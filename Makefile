@@ -41,3 +41,5 @@ lint-strict:
 	python3 -m flake8 .
 	@echo "\n----Running mypy in strict mode----"
 	python3 -m mypy . --strict
+
+.PHONY: install run debug clean lint lint-strict
