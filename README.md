@@ -9,4 +9,4 @@ keep in mind:
 - doc strings in funcs and classes to document purpose, parameters, and returns.
 
 to do:
-
+- [ ]
