@@ -1,5 +1,5 @@
 PROGRAM = fly_in.py
-CONFIG = config.txt
+CONFIG = maps/easy/01_linear_path.txt
 REQ = requirements.txt
 
 .PHONY: install run debug clean lint lint-strict requirements
