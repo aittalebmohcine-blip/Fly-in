@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional, Set
 
 
 def parse_int(value: str, key: str) -> int:
@@ -15,16 +15,38 @@ def parse_coords(value: Tuple[str, str], key: str) -> Tuple[int, int]:
     return (x, y)
 
 
-def parse_meta_data():
-    pass
+def remove_first_last(s: str) -> Optional[str]:
+    return s[1:-1] if len(s) > 2 else None
+
+
+DEFAULTS: Dict[str, Any] = {
+    "zone": "normal",
+    "color": None,
+    "max_drones": 1,
+}
+ZONE_VALID_VALUES = ["normal", "blocked", "restricted", "priority"]
+
+
+def parse_meta_data(value: str, key: str) -> Dict:
+    if not value.startswith("[") or not value.endswith("]"):
+        raise ValueError("Wrong meta-data format. use: [meta-data]")
+
+    v: List[str] = remove_first_last(value).split()
+    data: str
+    for data in v:
+        result: Dict[str, str] = {}
+        if "=" not in data:
+            raise ValueError(f"missing '=' in {data}")
+        paire = data.split("=")
+        result[paire[0]] = paire[1]
 
 
 def parse_hub(value: str, key: str) -> Dict[str, Any]:
-    parts: List[str] = value.split(3)
+    parts: List[str] = value.split(None, 3)
     return {
         "name": parts[0],
         "coords": parse_coords((parts[1], parts[2]), key),
-        "meta-data": parse_meta_data(parts[3])
+        "meta-data": parse_meta_data(parts[3], key)
     }
 
 
@@ -75,9 +97,9 @@ def parsing_config_file(file_path: str) -> DronesConfig:
                     continue
 
                 # duplicated key
-                if key in raw:
-                    errors.append(f"Line {lineno}: duplicate key '{key}'")
-                    continue
+                # if key in raw:
+                #    errors.append(f"Line {lineno}: duplicate key '{key}'")
+                #    continue
 
                 try:
                     # first line is nb_drones
@@ -89,10 +111,9 @@ def parsing_config_file(file_path: str) -> DronesConfig:
                         raw[key] = parse_int(value, key)
                         first_valid_line = False
 
-                    # parse hubs
+                    # parse hubs: extract type, name, x, y,optional metadata
                     if key in {"START_HUB", "HUB", "END_HUB"}:
-                        result: Dict[str, Any] = parse_hub(value, key)
-                        raw[]
+                        raw[key] = parse_hub(value, key)
 
                     # parse connections
 
@@ -102,7 +123,9 @@ def parsing_config_file(file_path: str) -> DronesConfig:
             if errors:
                 raise ValueError("\n".join(errors))
 
-            return DronesConfig(**raw)
+            # return DronesConfig(**raw)
+            print("finish")
+            return None
 
     except FileNotFoundError:
         raise RuntimeError("Config file not found")

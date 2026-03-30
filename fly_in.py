@@ -8,10 +8,13 @@ def main() -> None:
         exit(1)
 
     file_path = sys.argv[1]
-    try:
-        parser.parsing_config_file(file_path)
-    except Exception as e:
-        print(e)
+
+    parser.parsing_config_file(file_path)
+    # try:
+    #    parser.parsing_config_file(file_path)
+    # except Exception as e:
+    #    print(e)
+    #    exit(1)
 
 
 if __name__ == "__main__":
