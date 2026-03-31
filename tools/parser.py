@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict, Any, Tuple, Optional, Set
+from typing import List, Dict, Any, Tuple, Optional
 
 
 def parse_int(value: str, key: str) -> int:
@@ -27,10 +27,10 @@ DEFAULTS: Dict[str, Any] = {
 ZONE_VALID_VALUES = ["normal", "blocked", "restricted", "priority"]
 
 
-def parse_meta_data(value: str, key: str) -> Dict:
+def parse_meta_data(value: str, key: str) -> Dict[str, Any]:
     if not value.startswith("[") or not value.endswith("]"):
-        raise ValueError("Wrong meta-data format. use: [meta-data]")
-
+        raise ValueError(
+            "zone definition format should be: <name> <x> <y> [metadata]")
     v: List[str] = remove_first_last(value).split()
     data: str
     for data in v:
@@ -43,10 +43,16 @@ def parse_meta_data(value: str, key: str) -> Dict:
 
 def parse_hub(value: str, key: str) -> Dict[str, Any]:
     parts: List[str] = value.split(None, 3)
+    if len(parts) < 3:
+        raise ValueError(
+            "zone definition format should be: <name> <x> <y> [metadata]")
     return {
+        "hub_type": key,
         "name": parts[0],
         "coords": parse_coords((parts[1], parts[2]), key),
-        "meta-data": parse_meta_data(parts[3], key)
+        "meta-data": (
+            parse_meta_data(parts[3], key) if len(parts) == 4 else DEFAULTS
+        )
     }
 
 
@@ -72,6 +78,8 @@ def parsing_config_file(file_path: str) -> DronesConfig:
             lineno: int
             line: str
             first_valid_line: bool = True
+            start_hub_exist: bool = False
+            end_hub_exist: bool = False
 
             for lineno, line in enumerate(file, 1):
                 # skip coments and impty lines
@@ -106,26 +114,41 @@ def parsing_config_file(file_path: str) -> DronesConfig:
                     if first_valid_line:
                         if key != "NB_DRONES":
                             raise ValueError(
-                                f"Line {lineno}: 1st line must be 'NB_DRONES'"
+                                "first valid line must be 'NB_DRONES'"
                             )
                         raw[key] = parse_int(value, key)
                         first_valid_line = False
 
+                    # duplicat start or end hub
+                    if key == "START_HUB" and start_hub_exist:
+                        raise ValueError("Duplicate start_hub.")
+                    if key == "END_HUB" and end_hub_exist:
+                        raise ValueError("Duplicate end_hub.")
+                    if key == "START_HUB":
+                        start_hub_exist = True
+                    elif key == "END_HUB":
+                        end_hub_exist = True
+
                     # parse hubs: extract type, name, x, y,optional metadata
-                    if key in {"START_HUB", "HUB", "END_HUB"}:
-                        raw[key] = parse_hub(value, key)
+                    elif key in {"START_HUB", "HUB", "END_HUB"}:
+                        zone: Dict[str, Any] = parse_hub(value, key)
+                        if zone['name'] in raw:
+                            errors.append(
+                                f"Line {lineno}: duplicate name "
+                                f"'{zone['name']}'"
+                            )
+                        raw[zone["name"]] = zone
 
                     # parse connections
 
                 except ValueError as e:
                     errors.append(f"Line {lineno}: {e}")
 
+            print(raw)
             if errors:
                 raise ValueError("\n".join(errors))
 
             # return DronesConfig(**raw)
-            print("finish")
-            return None
 
     except FileNotFoundError:
         raise RuntimeError("Config file not found")
