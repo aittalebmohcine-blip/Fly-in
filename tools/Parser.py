@@ -1,4 +1,4 @@
-from typing import List
+from typing import Generator, List
 
 from tools.Connection import Connection
 from tools.Zone import Zone
@@ -22,21 +22,23 @@ class Parser():
                 start_hub_exist: bool = False
                 end_hub_exist: bool = False
                 nb_drones_exist: bool = False
+
+                line: str
                 for lineno, line in enumerate(file, 1):
-                    line.strip()
+                    line = line.strip()
                     try:
                         if not line or line.startswith("#"):
                             continue
                         if ":" not in line:
-                            raise ValueError("missing: ':")
-                        prefix: str = line.split(":", 1)[0]
+                            raise ValueError("missing ':'")
+                        prefix: str = line.split(":", 1)[0].strip()
                         # first line is nb_drones
                         if first_valid_line:
+                            first_valid_line = False
                             if prefix != "nb_drones":
                                 raise ValueError(
                                     "first valid line must be 'nb_drones'"
                                 )
-                            first_valid_line = False
                         # duplicat start, end hub or nb_drones
                         if prefix == "nb_drones":
                             if nb_drones_exist:
@@ -57,10 +59,16 @@ class Parser():
                             self._parse_hub(line)
                         elif prefix == "connection":
                             self._parse_connection(line)
+                        else:
+                            raise ValueError(f"Unknown key '{prefix}'")
                     except Exception as e:
                         errors.append(f"Line {lineno}: {e}")
-                    if errors:
-                        raise ValueError("\n".join(errors))
+                # missing start or end zone
+                for err in self._start_end_zones_existstance(
+                        start_hub_exist, end_hub_exist):
+                    errors.append(err)
+                if errors:
+                    raise ValueError("\n".join(errors))
             return map
 
         except FileNotFoundError:
@@ -69,6 +77,13 @@ class Parser():
             raise RuntimeError("Permission denied while reading config file")
         except IsADirectoryError as e:
             raise RuntimeError(e)
+
+    @staticmethod
+    def _start_end_zones_existstance(start: bool, end: bool) -> Generator[str]:
+        if not start:
+            yield ("There must be exactly one start_hub: zone ")
+        if not end:
+            yield ("There must be exactly one end_hub: zone ")
 
     @staticmethod
     def _parse_connection(line: str) -> Connection:
