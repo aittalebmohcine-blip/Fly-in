@@ -3,8 +3,6 @@ from enum import Enum
 
 Point = Tuple[int, int]
 
-print("hello")
-
 
 class DroneStatus(Enum):
     MOVING = "moving"
