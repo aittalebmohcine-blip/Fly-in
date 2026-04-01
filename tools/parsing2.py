@@ -92,3 +92,4 @@ class Simulation():
     It asks every Drone what it wants to do,
     asks every Zone/Connection if that action is allowed,
     updates the state, and prints the output.'''
+    pass
