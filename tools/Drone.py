@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from Definitions import Point, DroneStatus
+from tools.Definitions import Point, DroneStatus
 
 
 class Drone():

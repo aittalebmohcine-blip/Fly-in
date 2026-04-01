@@ -1,7 +1,7 @@
 from typing import List
 
-from Definitions import Point, ZoneType
-from Drone import Drone
+from tools.Definitions import Point, ZoneType
+from tools.Drone import Drone
 
 
 class Zone():

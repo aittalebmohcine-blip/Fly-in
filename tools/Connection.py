@@ -1,7 +1,7 @@
 from typing import Tuple, List
 
-from Drone import Drone
-from Zone import Zone
+from tools.Drone import Drone
+from tools.Zone import Zone
 
 
 class Connection():
