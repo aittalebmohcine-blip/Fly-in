@@ -1,8 +1,8 @@
-from typing import Generator, List
+from typing import List, Any, Dict
 
 from tools.Connection import Connection
 from tools.Zone import Zone
-from tools.Map import Map
+# from tools.Map import Map
 
 
 class Parser():
@@ -11,8 +11,9 @@ class Parser():
     def __init__(self, file_path: str) -> None:
         self.file_path: str = file_path
 
-    def parse(self) -> Map:
-        map: Map = Map()
+    def parse(self):
+        # map: Map = Map()
+        config: Dict[Any, Any] = {}
 
         # Logic to read file and return the Map object
         try:
@@ -43,7 +44,7 @@ class Parser():
                         if prefix == "nb_drones":
                             if nb_drones_exist:
                                 raise ValueError("Duplicate nb_drones line.")
-                            map.nb_drones = self._parse_nb_drones(line)
+                            # map.nb_drones = self._parse_nb_drones(line)
                             nb_drones_exist = True
                         elif prefix == "start_hub":
                             if start_hub_exist:
@@ -69,7 +70,7 @@ class Parser():
                     errors.append(err)
                 if errors:
                     raise ValueError("\n".join(errors))
-            return map
+            # return map
 
         except FileNotFoundError:
             raise RuntimeError("Config file not found")
@@ -79,7 +80,7 @@ class Parser():
             raise RuntimeError(e)
 
     @staticmethod
-    def _start_end_zones_existstance(start: bool, end: bool) -> Generator[str]:
+    def _start_end_zones_existstance(start: bool, end: bool):
         if not start:
             yield ("There must be exactly one start_hub: zone ")
         if not end:
