@@ -6,7 +6,7 @@
 from typing import Tuple, List
 from enum import Enum
 
-Point = tuple[int, int]
+Point = Tuple[int, int]
 
 
 class DroneStatus(Enum):
