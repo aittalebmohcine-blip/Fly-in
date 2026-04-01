@@ -3,7 +3,7 @@
 # Parser: Create a Parser class that reads the file and
 # instantiates Zone, Connection, and Drone objects.
 
-from typing import Tuple
+from typing import Tuple, List
 from enum import Enum
 
 Point = tuple[int, int]
@@ -54,4 +54,6 @@ class Zone():
 
 class Connection():
     def __init__(self) -> None:
-        pass
+        self.connecete: Tuple[Zone, Zone]
+        self.max_link_capacity: int
+        self.currently_traversing: List[Drone]
