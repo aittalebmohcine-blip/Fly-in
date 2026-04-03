@@ -10,6 +10,12 @@ class DroneStatus(Enum):
     DELIVERED = "delivered"
 
 
+class ZoneMetadataKeys(Enum):
+    ZONE = "zone"  # (default: normal)
+    COLOR = "color"  # (default: none)
+    MAX_DRONES = "max_drones"  # (default: 1)
+
+
 class ZoneType(Enum):
     NORMAL = "normal"
     BLOCKED = "blocked"

@@ -1,7 +1,8 @@
 # Easy Level 1: Simple linear path
 nb_drones: 2
 
-start_hub: start 0 0 [color=green]
+start_hub: start 0 0 [color = test zone=normal]]
+#start_hub: start 0 0 [color == 1 zone = restricted]
 hub: waypoint1 1 0 [color=blue]
 hub: waypoint2 2 0 [color=blue]
 hub: goal 2 0 [color=blue]
@@ -14,3 +15,4 @@ connection: waypoint2-goal
 
 # start_hub: start 0 0 []
 # start_hub: start 0 0 [    ]
+# start_hub: start 0 0 [ = = = = = = = = = = = = = =]

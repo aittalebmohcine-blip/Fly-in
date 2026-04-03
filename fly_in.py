@@ -10,12 +10,12 @@ def main() -> None:
     file_path = sys.argv[1]
 
     # parsing
-    parser = Parser(file_path)
     try:
-        map = parser.parse()
-        print(map.nb_drones)
+        parser = Parser(file_path)
+        parser.parse()
     except Exception as e:
-        print(e)
+        # print(e)
+        raise e
         return
 
 # try:

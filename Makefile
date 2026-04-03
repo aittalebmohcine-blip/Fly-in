@@ -8,7 +8,7 @@ install:
 	pip install -r $(REQ)
 
 run:
-	python3 $(PROGRAM) $(CONFIG)
+	@(python3 $(PROGRAM) $(CONFIG))
 
 debug:
 	python3 -m pdb $(PROGRAM) $(CONFIG)

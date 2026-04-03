@@ -12,4 +12,3 @@ class Drone(BaseModel):
     id: str
     loc: Point
     status: DroneStatus
-    path: str
