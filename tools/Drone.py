@@ -10,5 +10,7 @@ class Drone(BaseModel):
     It decides when to move based on its internal state.'''
 
     id: str
-    loc: Point
+    # loc: Point
+    loc: str
     status: DroneStatus
+    path: list[str] = []

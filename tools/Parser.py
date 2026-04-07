@@ -1,9 +1,10 @@
-from typing import List, Any, Dict
+from typing import List, Any, Dict, Tuple
 
 from tools.Drone import Drone
 from tools.Connection import Connection
 from tools.Zone import Zone
 from tools.Definitions import DroneStatus, Point, ZoneMetadataKeys, ZoneType
+from tools.Map import Map
 # from tools.Map import Map
 
 
@@ -27,6 +28,7 @@ class Parser():
                 nb_drones_exist: bool = False
                 nb_drones: int = 0
                 zone_lines: Dict[int, str] = {}
+                Connection_lines: Dict[int, str] = {}
 
                 line: str
                 for lineno, line in enumerate(file, 1):
@@ -34,6 +36,8 @@ class Parser():
                     try:
                         if not line or line.startswith("#"):
                             continue
+                        if "#" in line:
+                            line = line.split("#", 1)[0].strip()
                         if ":" not in line:
                             raise ValueError("missing ':'")
                         prefix: str = line.split(":", 1)[0].strip()
@@ -63,6 +67,7 @@ class Parser():
                         elif prefix == "hub":
                             zone_lines[lineno] = line
                         elif prefix == "connection":
+                            Connection_lines[lineno] = line
                             self._parse_connection(line)
                         else:
                             raise ValueError(f"Unknown key '{prefix}'")
@@ -76,10 +81,11 @@ class Parser():
                     raise ValueError("\n".join(errors))
 
             config["nb_drones"] = nb_drones
-            config["zones"] = self._zones_factory(zone_lines)
-            config["connections"] = ...
+            config["zones"] = self._zones_factory(zone_lines, nb_drones)
             config["drones"] = self._drones_factory(nb_drones)
-            # return map
+            config["connections"] = self._connection_factory(
+                Connection_lines, config["zones"])
+            return Map(**config)
 
         except FileNotFoundError:
             raise RuntimeError("Config file not found")
@@ -88,51 +94,138 @@ class Parser():
         except IsADirectoryError as e:
             raise RuntimeError(e)
 
-    def _zones_factory(self, data: Dict[int, str]) -> Dict[str, Zone]:
+    def _zones_factory(self, data: Dict[int, str], nb_drones: int) -> Dict[str, Zone]:
         zone: Zone
         space: Dict[str, Zone] = {}
         line: str
         for lineno, line in data.items():
             # remove the prefix
-            line = line.split(":")[1].strip()
+            line_suf = line.split(":")[1].strip()
             # split and strip
-            l: List[str] = list(map(str.strip, line.split(None, 3)))
+            l: List[str] = list(map(str.strip, line_suf.split(None, 3)))
             # validate format
             if len(l) < 3:
                 raise ValueError(
                     "Invalid zone! use '<zone>: <name> <x> <y> [metadata]'")
             coords: Point = self._parse_coords(l[1], l[2])
-            if len(l) == 4:
-                metadata: Dict[str, Any] = self._parse_zone_metadata(
-                    l[3], lineno)
-            zone = ...
+            metadata: Dict[str,
+                           Any] = self._parse_zone_metadata(l[3], lineno)
+            zone = Zone(coords=coords, **metadata)
+            # make sure end_hub and start_hub have capacity equal to nb_drones
+            if line.split(":")[0].strip() in {"end_hub", "start_hub"}:
+                zone.capacity = nb_drones
+            space[l[0]] = zone
         return space
 
     @staticmethod
-    def _parse_zone_metadata(metadata: str, lineno: int) -> Dict[ZoneMetadataKeys, Any]:
-        error_msg = f"Line {lineno}: Invalid metadata format. example usage '[type=zone]' (3 key value paires at most)"
+    def _drones_factory(count: int) -> Dict[str, Drone]:
+        swarm: Dict[str, Drone] = {}
+        name: str
+        for x in range(count):
+            name = f"D{x}"
+            drone: Drone = Drone(
+                id=name,
+                loc="start",
+                status=DroneStatus.WAITING,
+            )
+            swarm[name] = drone
+        return swarm
+
+    def _connection_factory(
+            self,
+            data: Dict[int, str],
+            zones: Dict[str, Zone]
+    ) -> Dict[Tuple[str, str], Connection]:
+        error_msg = "Invalid connection! use "
+        error_msg += "'connection: <name1>-<name2> [metadata]'"
+        connections: Dict[Tuple[str, str], Connection] = {}
+        names: Tuple[str, str]
+        raw: List[Tuple[str, str]] = []
+        for lineno, line in data.items():
+            # remove the prefix
+            line = line.split(":", 1)[1].strip()
+            # split and strip
+            l: List[str] = list(map(str.strip, line.split(None, 1)))
+            # validate conection format
+            # "-" in connection name
+            if "-" not in l[0]:
+                raise ValueError(error_msg)
+            # get the two zone names and ensure they are stripped
+            names = tuple(map(str.strip, l[0].split("-", 1)))
+            # ensure order is consistent for undirected connection
+            names = (names[0], names[1]) if names[0] < names[1] else (
+                names[1], names[0])
+            if names in raw:
+                raise ValueError(
+                    f"Line {lineno}: Duplicate connection "
+                    f"'{names[0]}-{names[1]}'")
+            raw.append(names)
+            # are names valid zone names
+            if not set(names).issubset(set(zones)):
+                raise ValueError(
+                    f"Line {lineno}: Connection names must be valid zone names"
+                )
+            # build the connection tuple
+            connecte = (zones[names[0]], zones[names[1]])
+            # verify metadata if exists and build the connection object
+            x: int = 1
+            if len(l) == 2 and l[1]:  # if metadata exists and is not empty
+                # rmove brackets and strip
+                if not l[1].startswith("[") or not l[1].endswith("]"):
+                    raise ValueError(f"Line {lineno}: {error_msg}")
+                l[1] = l[1][1:-1].strip()
+                # metadata must start with max_link_capacity
+                if l[1].count("=") != 1:
+                    raise ValueError(
+                        f"Line {lineno}: Connection metadata must "
+                        "contain exactly one key-value pair"
+                    )
+                if not l[1].startswith("max_link_capacity"):
+                    raise ValueError(
+                        f"Line {lineno}: Wrong metadata key! "
+                        "only 'max_link_capacity' is allowed"
+                    )
+                x = self._parse_connection_metadata(l[1], lineno)
+            connection: Connection = Connection(
+                connecete=connecte,
+                max_link_capacity=x,
+                currently_traversing=[]
+            )
+            connections[names] = connection
+        return connections
+
+    @staticmethod
+    def _parse_connection_metadata(data: str, i: int):
+        try:
+            x: int = int(data.split("=", 1)[1].strip())
+            if x < 1:
+                raise ValueError()
+            return x
+        except ValueError:
+            raise ValueError(
+                f"Line {i}: max_link_capacity must be a valid integer >= 1")
+
+    @staticmethod
+    def _parse_zone_metadata(metadata: str, lineno: int) -> Dict[str, Any]:
+        error_msg = f"Line {lineno}: Invalid metadata format. "
+        error_msg += "example usage '[type=zone]' (3 key value paires at most)"
         # default metadata
-        result: Dict[ZoneMetadataKeys, Any] = {
-            ZoneMetadataKeys.COLOR: None,
-            ZoneMetadataKeys.ZONE: ZoneType.NORMAL,
-            ZoneMetadataKeys.MAX_DRONES: 1,
+        result: Dict[str, Any] = {
+            "type": ZoneType.NORMAL,
+            "capacity": 1,
+            "drones_inside": [],
         }
+        # if metadata is empty, return default
+        if not metadata:
+            return result
         key_existe: dict[ZoneMetadataKeys, bool] = {
             ZoneMetadataKeys.ZONE: False,
             ZoneMetadataKeys.COLOR: False,
             ZoneMetadataKeys.MAX_DRONES: False,
         }
-        #           # defining validators
-        #           k: str
-        #           v: str
-        #           validators = {
-        #               ZoneMetadataKeys.ZONE: lambda v: ZoneType(v),
-        #               ZoneMetadataKeys.COLOR: lambda v: isinstance(v, str) and len(v.split()) == 1,
-        #               ZoneMetadataKeys.MAX_DRONES: lambda v: isinstance(
-        #                   v, int) and v >= 1,
-        #           }
-        # validate format
         if not all((metadata.startswith("["), metadata.endswith("]"))):
+            raise ValueError(error_msg)
+        if metadata.count("[") > 1 or metadata.count("]") > 1:
             raise ValueError(error_msg)
         # error on '=' invalid count
         counter: int = metadata.count("=")
@@ -143,6 +236,9 @@ class Parser():
         # sub validation func
 
         def validate_kv(k: str, v: str) -> None:
+            # ensure k and v are not empty
+            if not k or not v:
+                raise ValueError(error_msg)
             # udates parent func vars if k,v are valid else raises error
             nonlocal key_existe
             nonlocal result
@@ -160,6 +256,11 @@ class Parser():
             if key == ZoneMetadataKeys.ZONE:
                 value = ZoneType(v)
             elif key == ZoneMetadataKeys.COLOR:
+                if "-" in v or " " in v:
+                    raise ValueError(
+                        f"Line {lineno}: color must be a single word "
+                        "without spaces or dashes"
+                    )
                 value = v
             elif key == ZoneMetadataKeys.MAX_DRONES:
                 # check if max_drones is a positive integer
@@ -168,9 +269,12 @@ class Parser():
                         f"Line {lineno}: max_drones must be an integer >= 1")
                 else:
                     value = int(v)
-            result[key] = value
+            result[k] = value
 
-        def split_at_indices(target: List, split_indices: List[int]) -> List[str]:
+        def split_at_indices(
+                target: List,
+                split_indices: List[int]
+        ) -> List[str]:
             tokens: List[str] = []
             for i, item in enumerate(target):
                 if i in split_indices:
@@ -200,49 +304,32 @@ class Parser():
             validate_kv(*kvs[:2])
             validate_kv(*kvs[2:4])
             validate_kv(*kvs[4:])
-        print(result)
         return result
 
-    @ staticmethod
-    def _parse_coords(x: int, y: int) -> Point:
+    @staticmethod
+    def _parse_coords(x: str, y: str) -> Point:
         try:
             return (int(x), int(y))
         except Exception:
-            raise ValueError("Could not parse coordinates")
+            raise ValueError("Could not parse coordinates.")
 
-    @ staticmethod
-    def _drones_factory(count: int) -> Dict[str, Drone]:
-        swarm: Dict[str, Drone] = {}
-        name: str
-        for x in range(count):
-            name = f"D{x}"
-            drone: Drone = Drone(
-                id=name,
-                loc=(0, 0),
-                status=DroneStatus.WAITING,
-            )
-            swarm[name] = drone
-        return swarm
+    @staticmethod
+    def _parse_connection(line: str) -> Connection:
+        ...
 
-    @ staticmethod
+    @staticmethod
+    def _parse_nb_drones(line: str):
+        try:
+            x: str = line.split(":", 1)[1]
+            if int(x) < 1:
+                raise ValueError()
+            return int(x)
+        except ValueError:
+            raise ValueError("nb_drones must be an integer >= 1")
+
+    @staticmethod
     def _start_end_zones_existstance(start: bool, end: bool):
         if not start:
             yield ("There must be exactly one start_hub: zone ")
         if not end:
             yield ("There must be exactly one end_hub: zone ")
-
-    @ staticmethod
-    def _parse_connection(line: str) -> Connection:
-        ...
-
-    @ staticmethod
-    def _parse_hub(line: str) -> Zone:
-        ...
-
-    @ staticmethod
-    def _parse_nb_drones(line: str):
-        try:
-            x: str = line.split(":", 1)[1]
-            return int(x)
-        except ValueError:
-            raise ValueError("nb_drones must be an integer")

@@ -1,4 +1,8 @@
+import copy
+from typing import List
 from tools.Parser import Parser
+from tools.Simulation import Simulation
+from tools.Drone import Drone
 import sys
 
 
@@ -9,10 +13,27 @@ def main() -> None:
         exit(1)
     file_path = sys.argv[1]
 
-    # parsing
     try:
+        # parsing
         parser = Parser(file_path)
-        parser.parse()
+        map = parser.parse()
+        # simulating
+        map.build_graph()
+        graph = map.graph
+        solution: List[str] = Simulation.find_the_shortest_path(
+            graph, "start", "goal")
+        drone: Drone
+        for drone in map.drones.values():
+            drone.path = copy.deepcopy(solution)
+        print("---initialization done, starting simulation...---\n")
+        i = 0
+        while map.all_delivered() is False:
+            i += 1
+            print(map.advance_turn())
+            if i > 10:
+                print("simulation is taking too long, exiting...")
+                exit(1)
+
     except Exception as e:
         # print(e)
         raise e
