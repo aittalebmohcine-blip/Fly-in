@@ -1,5 +1,5 @@
 import copy
-from typing import List
+from typing import List, Tuple
 from tools.Parser import Parser
 from tools.Simulation import Simulation
 from tools.Drone import Drone
@@ -17,15 +17,25 @@ def main() -> None:
         # parsing
         parser = Parser(file_path)
         map = parser.parse()
+
         # simulating
         map.build_graph()
         graph = map.graph
-        solution: List[str] = Simulation.find_the_shortest_path(
+        solutions: List[List[str]] = Simulation.find_all_paths(
             graph, "start", "goal")
-        drone: Drone
-        for drone in map.drones.values():
-            drone.path = copy.deepcopy(solution)
+
+        # solve the graph
+        valid_sorted: List[Tuple[str, ...]
+                           ] = map.validate_sorte_paths(solutions)
+        priority_sorted: List[Tuple[str, ...]
+                              ] = map.sorte_by_priority(valid_sorted)
+        # give eache drone a path based on priority
+        i = 0
+        for name, drone in map.drones.items():
+            drone.path = copy.deepcopy(priority_sorted[i % map.nb_drones])
+
         print("---initialization done, starting simulation...---\n")
+
         i = 0
         while map.all_delivered() is False:
             i += 1

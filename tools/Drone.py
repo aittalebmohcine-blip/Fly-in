@@ -1,3 +1,4 @@
+from typing import Tuple
 from tools.Definitions import Point, DroneStatus
 from pydantic import BaseModel
 
@@ -13,4 +14,4 @@ class Drone(BaseModel):
     # loc: Point
     loc: str
     status: DroneStatus
-    path: list[str] = []
+    path: Tuple[str, ...] = ()

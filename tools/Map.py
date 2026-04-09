@@ -1,10 +1,10 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 from pydantic import BaseModel
 
 from tools.Drone import Drone
 from tools.Connection import Connection
 from tools.Zone import Zone
-from tools.Definitions import DroneStatus
+from tools.Definitions import DroneStatus, ZoneType
 
 
 class Map(BaseModel):
@@ -80,3 +80,50 @@ class Map(BaseModel):
         if not self.connections[key].is_available():
             return False
         return True
+
+    def validate_sorte_paths(
+
+        self,
+        solutions: List[List[str]]
+
+    ) -> List[Tuple[str, ...]]:
+
+        filtered_solutions: Dict[Tuple[str, ...], int] = {}
+        cost: int
+
+        # remove paths with blocked zones
+        for path in solutions:
+            valid_path: bool = True
+            cost = len(path)
+            for zone in path:
+                type = self.zones[zone].type
+                if type == ZoneType.BLOCKED:
+                    valid_path = False
+                    break
+                elif type == ZoneType.RESTRICTED:
+                    cost += 1
+            if valid_path:
+                filtered_solutions[tuple(path)] = cost
+        # sort and return
+        return [path for path in dict(
+            sorted(filtered_solutions.items(), key=lambda item: item[1]))]
+
+    def sorte_by_priority(
+
+        self,
+        solutions: List[Tuple[str, ...]],
+
+    ) -> List[Tuple[str, ...]]:
+        """sorts the given list of paths by the number of zones
+        who they have a priority type"""
+
+        return sorted(solutions, key=self._factor_calulator)
+
+    def _factor_calulator(self, path: Tuple[str, ...]) -> int:
+        """returns the count of priority zones in the given path"""
+        factor: int = 0
+        for zone in path:
+            type = self.zones[zone].type
+            if type == ZoneType.PRIORITY:
+                factor += 1
+        return factor

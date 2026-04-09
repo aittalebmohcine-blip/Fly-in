@@ -1,4 +1,4 @@
-from typing import Dict, Tuple, List, Set
+from typing import Dict, List, Tuple, Set
 from tools.Connection import Connection
 
 
@@ -11,44 +11,36 @@ class Simulation():
     updates the state, and prints the output.'''
 
     @classmethod
-    def find_the_shortest_path(
+    def find_all_paths(
         cls,
         graph: Dict[str, list[Tuple[str, Connection]]],
-        start_zone: str,
-        end_zone: str
-    ) -> list[str]:
-        '''Find the shortest path from start_zone to
-        end_zone using BFS's algorithm.'''
-        # - initialize the queue, visited set, parent dictionary
-        # and current location
-        queue: List[str] = [start_zone]
-        visited: Set[str] = {start_zone}
-        parent: Dict[str, str] = {start_zone: start_zone}
-        current_location: str
-        paths: List[List[str]] = []
+        start: str,
+        end: str
+    ) -> List[List[str]]:
+        all_paths: List[List[str]] = []
+        # Stack stores tuples: (current_node, path_so_far, visited_nodes)
+        stack: List[Tuple[str, List[str], Set[str]]] = [
+            (start, [start], {start})]
+        current: str
+        path: List[str]
+        visited: Set[str]
 
-        # - loop until the queue is empty:
-        while queue:
-            # - current_zone is always the first element that gets in the queue
-            current_location = queue.pop(0)
-            visited.add(current_location)
-            # - for each unvisited neighbor of current_zone:
-            for neighbour, _ in graph[current_location]:
-                if neighbour not in visited:
-                    # - curent_location is the prarent of its neighbors
-                    parent[neighbour] = current_location
-                    # - if we reached the end_zone, we can stop searching
-                    if neighbour == end_zone:
-                        # - extract path from parent dictionary and return it
-                        paths.append(cls._extract_path(
-                            parent, start_zone, end_zone))
-                    # mark neighbor as visited
-                    # visited.add(neighbour)
-                    # - add it to the queue
-                    queue.append(neighbour)
-        print(paths)
-        exit(0)
-        return []
+        while stack:
+            current, path, visited = stack.pop()
+
+            if current == end:
+                all_paths.append(path)
+                continue
+
+            for neighbor, _ in graph[current]:
+                # Assume graph[zone] returns list of connected zones
+                # Check if neighbor is blocked or already visited in this path
+                if neighbor not in visited:
+                    new_path = path + [neighbor]
+                    new_visited = visited | {neighbor}
+                    stack.append((neighbor, new_path, new_visited))
+
+        return all_paths
 
     @staticmethod
     def _extract_path(

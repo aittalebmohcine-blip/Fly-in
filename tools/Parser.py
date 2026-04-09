@@ -218,6 +218,7 @@ class Parser():
         # if metadata is empty, return default
         if not metadata:
             return result
+
         key_existe: dict[ZoneMetadataKeys, bool] = {
             ZoneMetadataKeys.ZONE: False,
             ZoneMetadataKeys.COLOR: False,
@@ -231,7 +232,7 @@ class Parser():
         counter: int = metadata.count("=")
         if (not counter and metadata) or counter > 3:
             raise ValueError(error_msg)
-        # get the row format
+        # remove first and last brackets
         metadata = metadata[1:-1]
         # sub validation func
 
@@ -254,6 +255,8 @@ class Parser():
             # ensure value is valid and update result
             value: Any = v
             if key == ZoneMetadataKeys.ZONE:
+                # raises an error if v is not valid zone type
+                k = "type"  # zone type is represented as type in Zone class
                 value = ZoneType(v)
             elif key == ZoneMetadataKeys.COLOR:
                 if "-" in v or " " in v:
@@ -270,6 +273,7 @@ class Parser():
                 else:
                     value = int(v)
             result[k] = value
+            # print(result.values())
 
         def split_at_indices(
                 target: List,
