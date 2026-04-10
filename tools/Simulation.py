@@ -29,6 +29,8 @@ class Simulation():
             current, path, visited = stack.pop()
 
             if current == end:
+                # remove the start zone as all drones have that pos by default
+                path.pop(0)
                 all_paths.append(path)
                 continue
 

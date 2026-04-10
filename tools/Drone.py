@@ -1,5 +1,5 @@
 from typing import Tuple
-from tools.Definitions import Point, DroneStatus
+from tools.Definitions import DroneStatus
 from pydantic import BaseModel
 
 
@@ -12,6 +12,6 @@ class Drone(BaseModel):
 
     id: str
     # loc: Point
-    loc: str
+    loc: str | Tuple[str, str]  # zone name or a connection entry
     status: DroneStatus
     path: Tuple[str, ...] = ()

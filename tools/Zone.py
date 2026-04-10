@@ -19,6 +19,7 @@ class Zone(BaseModel):
     type: ZoneType
     capacity: int
     drones_inside: List[Drone]
+    color: str
 
     def is_available(self) -> bool:
         if self.capacity - len(self.drones_inside) > 0:

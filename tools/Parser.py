@@ -109,7 +109,7 @@ class Parser():
                     "Invalid zone! use '<zone>: <name> <x> <y> [metadata]'")
             coords: Point = self._parse_coords(l[1], l[2])
             metadata: Dict[str,
-                           Any] = self._parse_zone_metadata(l[3], lineno)
+                           Any] = self._parse_zone_metadata(l[3] if len(l) == 4 else "", lineno)
             zone = Zone(coords=coords, **metadata)
             # make sure end_hub and start_hub have capacity equal to nb_drones
             if line.split(":")[0].strip() in {"end_hub", "start_hub"}:
@@ -214,6 +214,7 @@ class Parser():
             "type": ZoneType.NORMAL,
             "capacity": 1,
             "drones_inside": [],
+            "color": "white"
         }
         # if metadata is empty, return default
         if not metadata:

@@ -2,7 +2,6 @@ import copy
 from typing import List, Tuple
 from tools.Parser import Parser
 from tools.Simulation import Simulation
-from tools.Drone import Drone
 import sys
 
 
@@ -34,15 +33,12 @@ def main() -> None:
         for name, drone in map.drones.items():
             drone.path = copy.deepcopy(priority_sorted[i % map.nb_drones])
 
-        print("---initialization done, starting simulation...---\n")
+        # print("---initialization done, starting simulation...---\n")
 
         i = 0
-        while map.all_delivered() is False:
+        while not map.all_delivered():
             i += 1
-            print(map.advance_turn())
-            if i > 10:
-                print("simulation is taking too long, exiting...")
-                exit(1)
+            print(f"Turn {i}: ", map.advance_turn())
 
     except Exception as e:
         # print(e)

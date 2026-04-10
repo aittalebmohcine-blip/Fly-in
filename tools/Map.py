@@ -1,3 +1,5 @@
+from termcolor import colored
+
 from typing import Dict, Tuple, List
 from pydantic import BaseModel
 
@@ -43,8 +45,8 @@ class Map(BaseModel):
                 # drone
                 old_loc = drone.loc
                 drone.loc = action  # stil have to handle restriced zones
-                drone.path.pop(0)
-                if drone.path == []:
+                drone.path = drone.path[1:]
+                if not drone.path:
                     drone.status = DroneStatus.DELIVERED
                 # update taget zone and current zone
                 self.zones[action].drones_inside_append(drone)
@@ -55,7 +57,8 @@ class Map(BaseModel):
                 #   of the Connection in the case of restricted
                 #   zones, and remove the drone from it after 2 turns
                 # result
-                result += f"{drone.id}-{action} "
+                result += f"{drone.id}-" + colored(f"{action} ",
+                                                   self.zones[action].color)
         return result
 
     def all_delivered(self) -> bool:
@@ -69,10 +72,13 @@ class Map(BaseModel):
             drone.status = DroneStatus.DELIVERED
 
     def _is_action_allowed(self, drone: Drone, action: str) -> bool:
-        src: str = drone.loc
+        src: str | Tuple[str, str] = drone.loc
         a, b = sorted((src, action))
         key = (a, b)
 
+        # restricted action
+        if self.zones[action].type == ZoneType.RESTRICTED:
+            if drone.loc ==
         # unavailable zone
         if not self.zones[action].is_available():
             return False

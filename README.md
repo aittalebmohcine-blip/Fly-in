@@ -1,3 +1,10 @@
+# To Do
+- invalid colors
+- test benchmarks
+- challenger crash
+- drone stoping in a connection(restricted zones)
+
+
 # Extracting
 
 - colors provided => visual feedback (p10-colors)
@@ -26,7 +33,3 @@ keep in mind:
 - type hints : funcs params and returns, vars.
 - funcs must pass mypy.
 - doc strings in funcs and classes to document purpose, parameters, and returns.
-
-to do:
-- [ ]
-
