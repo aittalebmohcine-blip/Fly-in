@@ -126,9 +126,9 @@ class Map(BaseModel):
         # - if the drone is waiting in a connection and the target zone is
         #   free then the action is valid
         if isinstance(drone.loc, tuple):
-            if not self.zones[drone.loc[1]].is_available():
-                raise ValueError(
-                    "trying to move to an inavailable restricted zone")
+            # if not self.zones[drone.loc[1]].is_available():
+            #    raise ValueError(
+            #        "trying to move to an inavailable restricted zone")
             return True
         # - if the drone in a zone and the connection is free
         #   the action is allowed

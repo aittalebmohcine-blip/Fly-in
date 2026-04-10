@@ -21,7 +21,7 @@ def main() -> None:
         map.build_graph()
         graph = map.graph
         solutions: List[List[str]] = Simulation.find_all_paths(
-            graph, "start", "goal")
+            graph, "start", "impossible_goal")
 
         # solve the graph
         valid_sorted: List[Tuple[str, ...]
