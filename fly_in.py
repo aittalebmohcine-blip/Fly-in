@@ -39,6 +39,9 @@ def main() -> None:
         while not map.all_delivered():
             i += 1
             print(f"Turn {i}: ", map.advance_turn())
+            # if i > 10:
+            #    print("simulation is taking too long, exiting...")
+            #    exit(1)
 
     except Exception as e:
         # print(e)

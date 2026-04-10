@@ -19,6 +19,16 @@ class Connection(BaseModel):
     def is_available(self) -> bool:
         if self.currently_traversing is None:
             return True
-        if self.max_link_capacity - len(self.currently_traversing) > 0:
+        if self.max_link_capacity > len(self.currently_traversing):
             return True
         return False
+
+    def currently_trav_append(self, drone: Drone) -> None:
+        if not self.currently_traversing:
+            self.currently_traversing = [drone]
+            return
+        self.currently_traversing.append(drone)
+
+    def currently_traversing_remove(self, drone: Drone) -> None:
+        if self.currently_traversing:
+            self.currently_traversing.remove(drone)

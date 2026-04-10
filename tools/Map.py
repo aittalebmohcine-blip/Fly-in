@@ -35,10 +35,48 @@ class Map(BaseModel):
     def advance_turn(self) -> str:
         result = ""
         for drone in self.drones.values():
+
+            # skip arrived drones
             if drone.status == DroneStatus.DELIVERED:
                 continue
+
             # - ask the drone what it wants to do
             action = drone.path[0]
+
+            # restricted action handling
+            if self.zones[action].type == ZoneType.RESTRICTED:
+                if self._is_restricted_action_allowed(drone, action):
+                    # update zone link, and connection state
+                    # drone in a zone => move it to the Connection
+                    if isinstance(drone.loc, str):
+                        self.zones[drone.loc].drones_inside_remove(drone)
+                        x, y = tuple(sorted((drone.loc, action)))
+                        drone.loc = (x, y)
+                        self.connections[drone.loc].currently_trav_append(
+                            drone)
+                    # drone in a Connection => move it the zone
+                    else:
+                        self.connections[drone.loc].currently_traversing_remove(
+                            drone)
+                        drone.loc = action
+                        self.zones[action].drones_inside_append(drone)
+                        drone.path = drone.path[1:]
+                        if not drone.path:
+                            drone.status = DroneStatus.DELIVERED
+                        # stor conection
+                        # old_loc = drone.loc
+                        # drone.loc = action
+                        # drone.path = drone.path[1:]
+                        # if not drone.path:
+                        #    drone.status = DroneStatus.DELIVERED
+                        # update taget zone and current zone
+                        # self.connections[old_loc].currently_traversing_remove(
+                        #    drone)
+                    result += f"{drone.id}-" + \
+                        colored(f"{drone.loc} ", self.zones[action].color)
+                continue
+
+            # normal action handling
             # ask the zone/connection if that action is allowed
             if self._is_action_allowed(drone, action):
                 # - update the state
@@ -57,7 +95,7 @@ class Map(BaseModel):
                 #   of the Connection in the case of restricted
                 #   zones, and remove the drone from it after 2 turns
                 # result
-                result += f"{drone.id}-" + colored(f"{action} ",
+                result += f"{drone.id}-" + colored(f"{drone.loc} ",
                                                    self.zones[action].color)
         return result
 
@@ -76,9 +114,6 @@ class Map(BaseModel):
         a, b = sorted((src, action))
         key = (a, b)
 
-        # restricted action
-        if self.zones[action].type == ZoneType.RESTRICTED:
-            if drone.loc ==
         # unavailable zone
         if not self.zones[action].is_available():
             return False
@@ -86,6 +121,21 @@ class Map(BaseModel):
         if not self.connections[key].is_available():
             return False
         return True
+
+    def _is_restricted_action_allowed(self, drone: Drone, action: str) -> bool:
+        # - if the drone is waiting in a connection and the target zone is
+        #   free then the action is valid
+        if isinstance(drone.loc, tuple):
+            if not self.zones[drone.loc[1]].is_available():
+                raise ValueError(
+                    "trying to move to an inavailable restricted zone")
+            return True
+        # - if the drone in a zone and the connection is free
+        #   the action is allowed
+        l1, l2 = tuple(sorted((drone.loc, action)))
+        if self.connections[(l1, l2)].is_available():
+            return True
+        return False
 
     def validate_sorte_paths(
 
