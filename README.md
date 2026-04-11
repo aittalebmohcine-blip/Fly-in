@@ -2,6 +2,7 @@
 - [ ] flake8
 - [ ] mypy
 - [ ] parsing
+- [ ] understand the algorithm
 
 - file permission
 - test benchmarks

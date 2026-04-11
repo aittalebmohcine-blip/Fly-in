@@ -56,8 +56,10 @@ class Map(BaseModel):
                             drone)
                     # drone in a Connection => move it the zone
                     else:
-                        self.connections[drone.loc].currently_traversing_remove(
-                            drone)
+                        self.connections[
+                            drone.loc
+                        ].currently_traversing_remove(drone)
+
                         drone.loc = action
                         self.zones[action].drones_inside_append(drone)
                         drone.path = drone.path[1:]
@@ -104,10 +106,11 @@ class Map(BaseModel):
                     drone.status = DroneStatus.DELIVERED
                 # update taget zone and current zone
                 self.zones[action].drones_inside_append(drone)
-                self.zones[old_loc].drones_inside_remove(drone)
-                x, y = tuple(sorted((old_loc, action)))
-                self.connections[(x, y)].currently_trav_append(
-                    drone)
+                if isinstance(old_loc, str):
+                    self.zones[old_loc].drones_inside_remove(drone)
+                    x, y = tuple(sorted((old_loc, action)))
+                    self.connections[(x, y)].currently_trav_append(
+                        drone)
                 try:
                     result += f"{drone.id}-" + colored(
                         f"{drone.loc} ",
@@ -121,7 +124,10 @@ class Map(BaseModel):
         for connection in self.connections.values():
             if connection.currently_traversing:
                 for drone in connection.currently_traversing:
-                    if isinstance(drone.loc, str) and self.zones[drone.loc].type in [ZoneType.NORMAL, ZoneType.PRIORITY]:
+                    if (
+                            isinstance(drone.loc, str) and (self.zones[drone.loc].type in [
+                                ZoneType.NORMAL, ZoneType.PRIORITY])
+                    ):
                         connection.currently_traversing_remove(drone)
 
         return result
