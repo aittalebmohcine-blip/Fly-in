@@ -1,7 +1,9 @@
 # To Do
-- [ ] flake8
-- [ ] mypy
+- [x] flake8
+- [x] mypy
 - [ ] parsing
+- [ ] docstrings
+- [ ] documentation
 - [ ] understand the algorithm
 
 - file permission
