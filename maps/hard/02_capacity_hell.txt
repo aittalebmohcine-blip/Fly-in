@@ -2,9 +2,9 @@
 nb_drones: 12
 
 start_hub: start 0 0 [color=green max_drones=12]
-hub: gate1 1 0 [color=green max_drones=1]
-hub: gate2 2 0 [color=green max_drones=1]
-hub: gate3 3 0 [color=green max_drones=1]
+hub: gate1 1 0 [color=orange max_drones=1]
+hub: gate2 2 0 [color=orange max_drones=1]
+hub: gate3 3 0 [color=orange max_drones=1]
 hub: waiting_area1 1 1 [color=blue max_drones=4]
 hub: waiting_area2 2 1 [color=blue max_drones=4]
 hub: waiting_area3 3 1 [color=blue max_drones=4]
@@ -14,7 +14,7 @@ hub: restricted_tunnel3 6 0 [zone=restricted color=red max_drones=2]
 hub: priority_bypass1 4 1 [zone=priority color=cyan max_drones=3]
 hub: priority_bypass2 5 1 [zone=priority color=cyan max_drones=3]
 hub: convergence 7 0 [color=yellow max_drones=6]
-hub: final_bottleneck 8 0 [color=green max_drones=3]
+hub: final_bottleneck 8 0 [color=orange max_drones=3]
 end_hub: goal 9 0 [color=green max_drones=12]
 
 # Sequential gates (major bottleneck)

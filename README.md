@@ -1,9 +1,13 @@
 # To Do
-- invalid colors
-- test benchmarks
-- challenger crash
-- drone stoping in a connection(restricted zones)
+- [ ] flake8
+- [ ] mypy
+- [ ] parsing
 
+- file permission
+- test benchmarks
+- drone stoping in a connection(restricted zones)
+- preiority zones are prefered in path finding
+- unique names
 
 # Extracting
 

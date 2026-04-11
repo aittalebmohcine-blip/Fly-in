@@ -72,8 +72,24 @@ class Map(BaseModel):
                         # update taget zone and current zone
                         # self.connections[old_loc].currently_traversing_remove(
                         #    drone)
-                    result += f"{drone.id}-" + \
-                        colored(f"{drone.loc} ", self.zones[action].color)
+                    if isinstance(drone.loc, str):
+                        try:
+                            result += f"{drone.id}-" + \
+                                colored(f"{drone.loc} ",
+                                        self.zones[action].color)
+                        except KeyError:
+                            # default color
+                            result += f"{drone.id}-" + \
+                                colored(f"{drone.loc} ", "red")
+                    else:
+                        try:
+                            result += f"{drone.id}-" + \
+                                colored(f"{drone.loc[0]}-{drone.loc[1]} ",
+                                        self.zones[action].color)
+                        except KeyError:
+                            result += f"{drone.id}-" + \
+                                colored(
+                                    f"{drone.loc[0]}-{drone.loc[1]} ", "blue")
                 continue
 
             # normal action handling
@@ -89,14 +105,25 @@ class Map(BaseModel):
                 # update taget zone and current zone
                 self.zones[action].drones_inside_append(drone)
                 self.zones[old_loc].drones_inside_remove(drone)
-                # connection:
-                #   this is related to the restricted zones
-                #   we need to update the curently_traversing list
-                #   of the Connection in the case of restricted
-                #   zones, and remove the drone from it after 2 turns
-                # result
-                result += f"{drone.id}-" + colored(f"{drone.loc} ",
-                                                   self.zones[action].color)
+                x, y = tuple(sorted((old_loc, action)))
+                self.connections[(x, y)].currently_trav_append(
+                    drone)
+                try:
+                    result += f"{drone.id}-" + colored(
+                        f"{drone.loc} ",
+                        self.zones[action].color
+                    )
+                except KeyError:
+                    result += f"{drone.id}-" + colored(
+                        f"{drone.loc} ",
+                        "green"
+                    )
+        for connection in self.connections.values():
+            if connection.currently_traversing:
+                for drone in connection.currently_traversing:
+                    if isinstance(drone.loc, str) and self.zones[drone.loc].type in [ZoneType.NORMAL, ZoneType.PRIORITY]:
+                        connection.currently_traversing_remove(drone)
+
         return result
 
     def all_delivered(self) -> bool:

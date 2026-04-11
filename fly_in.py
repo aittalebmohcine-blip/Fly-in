@@ -1,5 +1,6 @@
 import copy
 from typing import List, Tuple
+from tools.Definitions import EdgeType
 from tools.Parser import Parser
 from tools.Simulation import Simulation
 import sys
@@ -20,8 +21,16 @@ def main() -> None:
         # simulating
         map.build_graph()
         graph = map.graph
+
+        start: str = ""
+        end: str = ""
+        for zone in map.zones:
+            if map.zones[zone].edge == EdgeType.START:
+                start = zone
+            if map.zones[zone].edge == EdgeType.END:
+                end = zone
         solutions: List[List[str]] = Simulation.find_all_paths(
-            graph, "start", "impossible_goal")
+            graph, start, end)
 
         # solve the graph
         valid_sorted: List[Tuple[str, ...]
@@ -56,4 +65,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("Simulation interrupted! quitting.")

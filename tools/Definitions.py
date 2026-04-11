@@ -21,3 +21,9 @@ class ZoneType(Enum):
     BLOCKED = "blocked"
     RESTRICTED = "restricted"
     PRIORITY = "priority"
+
+
+class EdgeType(Enum):
+    START = "start"
+    END = "end"
+    NONE = None

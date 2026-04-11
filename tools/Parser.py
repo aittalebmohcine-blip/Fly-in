@@ -3,7 +3,8 @@ from typing import List, Any, Dict, Tuple
 from tools.Drone import Drone
 from tools.Connection import Connection
 from tools.Zone import Zone
-from tools.Definitions import DroneStatus, Point, ZoneMetadataKeys, ZoneType
+from tools.Definitions import (
+    DroneStatus, EdgeType, Point, ZoneMetadataKeys, ZoneType)
 from tools.Map import Map
 # from tools.Map import Map
 
@@ -68,7 +69,6 @@ class Parser():
                             zone_lines[lineno] = line
                         elif prefix == "connection":
                             Connection_lines[lineno] = line
-                            self._parse_connection(line)
                         else:
                             raise ValueError(f"Unknown key '{prefix}'")
                     except Exception as e:
@@ -94,7 +94,12 @@ class Parser():
         except IsADirectoryError as e:
             raise RuntimeError(e)
 
-    def _zones_factory(self, data: Dict[int, str], nb_drones: int) -> Dict[str, Zone]:
+    def _zones_factory(
+        self,
+        data: Dict[int, str],
+        nb_drones: int
+    ) -> Dict[str, Zone]:
+
         zone: Zone
         space: Dict[str, Zone] = {}
         line: str
@@ -108,12 +113,22 @@ class Parser():
                 raise ValueError(
                     "Invalid zone! use '<zone>: <name> <x> <y> [metadata]'")
             coords: Point = self._parse_coords(l[1], l[2])
-            metadata: Dict[str,
-                           Any] = self._parse_zone_metadata(l[3] if len(l) == 4 else "", lineno)
+
+            metadata: Dict[
+                str,
+                Any
+            ] = self._parse_zone_metadata(l[3] if len(l) == 4 else "", lineno)
+
             zone = Zone(coords=coords, **metadata)
             # make sure end_hub and start_hub have capacity equal to nb_drones
-            if line.split(":")[0].strip() in {"end_hub", "start_hub"}:
+            # and the type is start/end
+            prefix: str = line.split(":")[0].strip()
+            if prefix in {"end_hub", "start_hub"}:
                 zone.capacity = nb_drones
+                if prefix == "start_hub":
+                    zone.edge = EdgeType.START
+                if prefix == "end_hub":
+                    zone.edge = EdgeType.END
             space[l[0]] = zone
         return space
 
@@ -151,7 +166,8 @@ class Parser():
             if "-" not in l[0]:
                 raise ValueError(error_msg)
             # get the two zone names and ensure they are stripped
-            names = tuple(map(str.strip, l[0].split("-", 1)))
+            z1, z2 = tuple(map(str.strip, l[0].split("-", 1)))
+            names = (z1, z2)
             # ensure order is consistent for undirected connection
             names = (names[0], names[1]) if names[0] < names[1] else (
                 names[1], names[0])
@@ -206,7 +222,10 @@ class Parser():
                 f"Line {i}: max_link_capacity must be a valid integer >= 1")
 
     @staticmethod
-    def _parse_zone_metadata(metadata: str, lineno: int) -> Dict[str, Any]:
+    def _parse_zone_metadata(
+            metadata: str,
+            lineno: int
+    ) -> Dict[str, Any]:
         error_msg = f"Line {lineno}: Invalid metadata format. "
         error_msg += "example usage '[type=zone]' (3 key value paires at most)"
         # default metadata
@@ -214,7 +233,8 @@ class Parser():
             "type": ZoneType.NORMAL,
             "capacity": 1,
             "drones_inside": [],
-            "color": "white"
+            "color": "white",
+            "edge": None
         }
         # if metadata is empty, return default
         if not metadata:
@@ -273,8 +293,10 @@ class Parser():
                         f"Line {lineno}: max_drones must be an integer >= 1")
                 else:
                     value = int(v)
+                    # k is max_drones but i store it as capacity
+                    k = "capacity"
             result[k] = value
-            # print(result.values())
+            # print(result.keys())
 
         def split_at_indices(
                 target: List,
@@ -317,10 +339,6 @@ class Parser():
             return (int(x), int(y))
         except Exception:
             raise ValueError("Could not parse coordinates.")
-
-    @staticmethod
-    def _parse_connection(line: str) -> Connection:
-        ...
 
     @staticmethod
     def _parse_nb_drones(line: str):

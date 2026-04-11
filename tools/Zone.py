@@ -2,7 +2,7 @@ from typing import List
 from pydantic import BaseModel
 
 
-from tools.Definitions import Point, ZoneType
+from tools.Definitions import Point, ZoneType, EdgeType
 from tools.Drone import Drone
 
 
@@ -17,6 +17,7 @@ class Zone(BaseModel):
 
     coords: Point
     type: ZoneType
+    edge: EdgeType
     capacity: int
     drones_inside: List[Drone]
     color: str
