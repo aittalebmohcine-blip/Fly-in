@@ -1,4 +1,4 @@
-from typing import List, Any, Dict, Tuple
+from typing import List, Any, Dict, Tuple, Iterator
 
 from tools.Drone import Drone
 from tools.Connection import Connection
@@ -15,7 +15,7 @@ class Parser():
     def __init__(self, file_path: str) -> None:
         self.file_path: str = file_path
 
-    def parse(self):
+    def parse(self) -> Map:
         # map: Map = Map()
         config: Dict[Any, Any] = {}
 
@@ -53,7 +53,7 @@ class Parser():
                         if prefix == "nb_drones":
                             if nb_drones_exist:
                                 raise ValueError("Duplicate nb_drones line.")
-                            nb_drones: int = self._parse_nb_drones(line)
+                            nb_drones = self._parse_nb_drones(line)
                             nb_drones_exist = True
                         elif prefix == "start_hub":
                             if start_hub_exist:
@@ -211,7 +211,7 @@ class Parser():
         return connections
 
     @staticmethod
-    def _parse_connection_metadata(data: str, i: int):
+    def _parse_connection_metadata(data: str, i: int) -> int:
         try:
             x: int = int(data.split("=", 1)[1].strip())
             if x < 1:
@@ -262,8 +262,8 @@ class Parser():
             if not k or not v:
                 raise ValueError(error_msg)
             # udates parent func vars if k,v are valid else raises error
-            nonlocal key_existe
-            nonlocal result
+            # nonlocal key_existe
+            # nonlocal result
             # get the enum key
             try:
                 key = ZoneMetadataKeys(k)
@@ -299,7 +299,7 @@ class Parser():
             # print(result.keys())
 
         def split_at_indices(
-                target: List,
+                target: List[str],
                 split_indices: List[int]
         ) -> List[str]:
             tokens: List[str] = []
@@ -324,7 +324,7 @@ class Parser():
             validate_kv(*kvs[:2])
             validate_kv(*kvs[2:])
         if counter == 3:
-            kvs: List[str] = list(map(str.strip, metadata.split("=", 3)))
+            kvs = list(map(str.strip, metadata.split("=", 3)))
             kvs = split_at_indices(kvs, [1, 2])
             if len(kvs) != 6:
                 raise ValueError(error_msg)
@@ -341,7 +341,7 @@ class Parser():
             raise ValueError("Could not parse coordinates.")
 
     @staticmethod
-    def _parse_nb_drones(line: str):
+    def _parse_nb_drones(line: str) -> int:
         try:
             x: str = line.split(":", 1)[1]
             if int(x) < 1:
@@ -351,7 +351,7 @@ class Parser():
             raise ValueError("nb_drones must be an integer >= 1")
 
     @staticmethod
-    def _start_end_zones_existstance(start: bool, end: bool):
+    def _start_end_zones_existstance(start: bool, end: bool) -> Iterator[str]:
         if not start:
             yield ("There must be exactly one start_hub: zone ")
         if not end:

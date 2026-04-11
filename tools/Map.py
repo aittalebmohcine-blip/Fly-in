@@ -125,8 +125,9 @@ class Map(BaseModel):
             if connection.currently_traversing:
                 for drone in connection.currently_traversing:
                     if (
-                            isinstance(drone.loc, str) and (self.zones[drone.loc].type in [
-                                ZoneType.NORMAL, ZoneType.PRIORITY])
+                            isinstance(drone.loc, str) and (
+                                self.zones[drone.loc].type in [
+                                    ZoneType.NORMAL, ZoneType.PRIORITY])
                     ):
                         connection.currently_traversing_remove(drone)
 
@@ -144,13 +145,16 @@ class Map(BaseModel):
 
     def _is_action_allowed(self, drone: Drone, action: str) -> bool:
         src: str | Tuple[str, str] = drone.loc
-        a, b = sorted((src, action))
-        key = (a, b)
 
         # unavailable zone
         if not self.zones[action].is_available():
             return False
         # unavailable connection
+        a: str = ""
+        b: str = ""
+        if isinstance(src, str):
+            a, b = sorted((src, action))
+        key = (a, b)
         if not self.connections[key].is_available():
             return False
         return True
