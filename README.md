@@ -8,29 +8,29 @@
 - [x] Verify handling of files with no connections or no intermediate hubs.
 
 ## 2. `nb_drones` Validation
-- [ ] Reject non-integer values (e.g., floats, strings, empty).
-- [ ] Reject zero or negative integers.
-- [ ] Reject missing value after colon (`nb_drones:`).
+- [x] Reject non-integer values (e.g., floats, strings, empty).
+- [x] Reject zero or negative integers.
+- [x] Reject missing value after colon (`nb_drones:`).
 - [ ] Reject whitespace between key, colon, and value (`nb_drones : 5` or `nb_drones:  5` if strict).
-- [ ] Accept valid positive integers.
+- [x] Accept valid positive integers.
 
 ## 3. Zone Definition Syntax
-- [ ] Reject lines missing type prefix (`start_hub:`, `end_hub:`, `hub:`).
-- [ ] Reject misspelled or case-mismatched prefixes.
-- [ ] Reject zones missing name, X, or Y coordinate.
-- [ ] Reject coordinates that are not integers (floats, letters, symbols).
-- [ ] Reject zones with trailing metadata missing opening/closing brackets.
-- [ ] Reject lines with multiple metadata blocks or malformed bracket syntax.
+- [x] Reject lines missing type prefix (`start_hub:`, `end_hub:`, `hub:`).
+- [x] Reject misspelled or case-mismatched prefixes.
+- [x] Reject zones missing name, X, or Y coordinate.
+- [x] Reject coordinates that are not integers (floats, letters, symbols).
+- [x] Reject zones with trailing metadata missing opening/closing brackets.
+- [x] Reject lines with multiple metadata blocks or malformed bracket syntax.
 
 ## 4. Zone Names & Coordinates
-- [ ] Reject zone names containing dashes (`-`).
-- [ ] Reject zone names containing spaces.
-- [ ] Reject duplicate zone names across the entire file.
-- [ ] Verify coordinates are stored/parsed as exact integers.
-- [ ] Verify exactly one `start_hub:` exists in the file.
-- [ ] Verify exactly one `end_hub:` exists in the file.
-- [ ] Reject files with zero `start_hub:` or zero `end_hub:`.
-- [ ] Reject files with multiple `start_hub:` or `end_hub:`.
+- [x] Reject zone names containing dashes (`-`).
+- [x] Reject zone names containing spaces.
+- [x] Reject duplicate zone names across the entire file.
+- [x] Verify coordinates are stored/parsed as exact integers.
+- [x] Verify exactly one `start_hub:` exists in the file.
+- [x] Verify exactly one `end_hub:` exists in the file.
+- [x] Reject files with zero `start_hub:` or zero `end_hub:`.
+- [x] Reject files with multiple `start_hub:` or `end_hub:`.
 
 ## 5. Zone Metadata Parsing
 - [ ] Accept missing metadata block and apply defaults (`zone=normal`, `max_drones=1`, `color` unspecified).
