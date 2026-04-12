@@ -1,13 +1,14 @@
 from typing import List, Tuple
 import sys
-# import os
 import copy
+
 
 from tools.Parser import Parser
 from tools.Simulation import Simulation
 
 
 def main() -> None:
+
     # handling arguments
     if len(sys.argv) != 2:
         print("usage: python3 fly_in.py <config-file>")
@@ -84,7 +85,6 @@ def main() -> None:
             print(f"Turn {i}: ", map.advance_turn())
 
     except Exception as e:
-        raise e
         print(e)
         return
 

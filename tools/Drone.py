@@ -1,6 +1,12 @@
+from re import I
 from typing import Tuple
 from tools.Definitions import DroneStatus
-from pydantic import BaseModel
+try:
+    from pydantic import BaseModel
+except ImportError:
+    print("Error: 'pydantic' is not installed."
+          " Please install it using 'pip install pydantic'.")
+    exit(1)
 
 
 class Drone(BaseModel):

@@ -1,7 +1,12 @@
-from termcolor import colored
+try:
+    from termcolor import colored
+except ImportError:
+    print("Error: 'termcolor' is not installed."
+          " Please install it using 'pip termcolor pydantic'.")
+    exit(1)
+from pydantic import BaseModel
 
 from typing import Dict, Tuple, List
-from pydantic import BaseModel
 
 from tools.Drone import Drone
 from tools.Connection import Connection
