@@ -50,6 +50,7 @@ def main() -> None:
             print(f"Turn {i}: ", map.advance_turn())
 
     except Exception as e:
+        raise e
         print(e)
         return
 

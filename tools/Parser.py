@@ -6,7 +6,6 @@ from tools.Zone import Zone
 from tools.Definitions import (
     DroneStatus, EdgeType, Point, ZoneMetadataKeys, ZoneType)
 from tools.Map import Map
-# from tools.Map import Map
 
 
 class Parser():
@@ -21,6 +20,7 @@ class Parser():
 
         # Logic to read file and return the Map object
         try:
+            # opening the file
             with open(self.file_path, "r") as file:
                 errors: List[str] = []
                 first_valid_line: bool = True
@@ -29,50 +29,78 @@ class Parser():
                 nb_drones_exist: bool = False
                 nb_drones: int = 0
                 zone_lines: Dict[int, str] = {}
-                Connection_lines: Dict[int, str] = {}
+                connection_lines: Dict[int, str] = {}
 
                 line: str
+                # reading line by line
                 for lineno, line in enumerate(file, 1):
                     line = line.strip()
                     try:
+                        # remove comments
                         if not line or line.startswith("#"):
                             continue
                         if "#" in line:
                             line = line.split("#", 1)[0].strip()
+
+                        # missig ':'
                         if ":" not in line:
                             raise ValueError("missing ':'")
+
+                        # pick the prefix
                         prefix: str = line.split(":", 1)[0].strip()
-                        # first line is nb_drones
+
+                        # - first time to reache this block, means
+                        # first valid line is true
+                        # - first line is nb_drones
                         if first_valid_line:
                             first_valid_line = False
                             if prefix != "nb_drones":
+                                # beffor raising an error, validate that line
+                                if prefix == "start_hub":
+                                    start_hub_exist = True
+                                if prefix == "end_hub":
+                                    end_hub_exist = True
                                 raise ValueError(
                                     "first valid line must be 'nb_drones'"
                                 )
+
                         # duplicat start, end hub or nb_drones
+                        # - check duplicate nb_drones. parse it.
                         if prefix == "nb_drones":
                             if nb_drones_exist:
                                 raise ValueError("Duplicate nb_drones line.")
                             nb_drones = self._parse_nb_drones(line)
                             nb_drones_exist = True
+
+                        # - check duplicate nb_drones.
                         elif prefix == "start_hub":
                             if start_hub_exist:
                                 raise ValueError("Duplicate start_hub.")
                             zone_lines[lineno] = line
                             start_hub_exist = True
+
+                        # - check duplicate nb_drones.
                         elif prefix == "end_hub":
                             if end_hub_exist:
                                 raise ValueError("Duplicate end_hub.")
                             zone_lines[lineno] = line
                             end_hub_exist = True
+
+                        # add hub to zone_lines dict
                         elif prefix == "hub":
                             zone_lines[lineno] = line
+                        # add connection to connection_lines
                         elif prefix == "connection":
-                            Connection_lines[lineno] = line
+                            connection_lines[lineno] = line
+
+                        # error on an unkoun key.
                         else:
                             raise ValueError(f"Unknown key '{prefix}'")
+
+                    # catch and save errors.
                     except Exception as e:
                         errors.append(f"Line {lineno}: {e}")
+
                 # missing start or end zone
                 for err in self._start_end_zones_existstance(
                         start_hub_exist, end_hub_exist):
@@ -84,7 +112,7 @@ class Parser():
             config["zones"] = self._zones_factory(zone_lines, nb_drones)
             config["drones"] = self._drones_factory(nb_drones)
             config["connections"] = self._connection_factory(
-                Connection_lines, config["zones"])
+                connection_lines, config["zones"])
             return Map(**config)
 
         except FileNotFoundError:
