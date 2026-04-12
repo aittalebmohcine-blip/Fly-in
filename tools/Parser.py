@@ -146,10 +146,17 @@ class Parser():
             # split and strip
             l: List[str] = list(map(str.strip, line_suf.split(None, 3)))
 
+            # empty zone data
+            if not l:
+                raise ValueError(
+                    f"Line {lineno}: Invalid zone! "
+                    "use '<zone>: <name> <x> <y> [metadata]'")
+
             # make sure there is no '-' in the name
             if "-" in l[0]:
                 raise ValueError(
                     f"Line {lineno}: '-' is not allowed in the zone name")
+
             # make sure name does not exists and add it to raw names
             if l[0] in raw_names:
                 raise ValueError(f"Line {lineno}: duplicated zone name")
