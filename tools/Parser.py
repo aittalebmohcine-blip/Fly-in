@@ -347,8 +347,6 @@ class Parser():
             if not k or not v:
                 raise ValueError(error_msg)
             # udates parent func vars if k,v are valid else raises error
-            # nonlocal key_existe
-            # nonlocal result
             # get the enum key
             try:
                 key = ZoneMetadataKeys(k)

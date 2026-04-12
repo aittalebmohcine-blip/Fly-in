@@ -33,27 +33,8 @@ def main() -> None:
         # extract start and gola zone names
         start, goal = map.extract_start_goal_names()
 
-        # start: str = ""
-        # goal: str = ""
-        # for zone in map.zones:
-        #    if map.zones[zone].edge == EdgeType.START:
-        #        start = zone
-        #    if map.zones[zone].edge == EdgeType.END:
-        #        goal = zone
-
         # graph has start and goal nodes
         map.verify_start_goal_in_graph()
-        # s_exist: bool = False
-        # g_exist: bool = False
-        # for node in graph.keys():
-        #    if node == start:
-        #        s_exist = True
-        #    elif node == goal:
-        #        g_exist = True
-        # if not all((s_exist, g_exist)):
-        #    raise RuntimeError(
-        #        "GRAPH ERROR: make sure there is a "
-        #        "link between start and end hubs")
 
         # find all possible paths
         solutions: List[List[str]] = Simulation.find_all_paths(

@@ -107,15 +107,7 @@ class Map(BaseModel):
                         drone.path = drone.path[1:]
                         if not drone.path:
                             drone.status = DroneStatus.DELIVERED
-                        # stor conection
-                        # old_loc = drone.loc
-                        # drone.loc = action
-                        # drone.path = drone.path[1:]
-                        # if not drone.path:
-                        #    drone.status = DroneStatus.DELIVERED
-                        # update taget zone and current zone
-                        # self.connections[old_loc].currently_traversing_remove(
-                        #    drone)
+
                     if isinstance(drone.loc, str):
                         try:
                             result += f"{drone.id}-" + \
@@ -205,15 +197,14 @@ class Map(BaseModel):
         # - if the drone is waiting in a connection and the target zone is
         #   free then the action is valid
         if isinstance(drone.loc, tuple):
-            # if not self.zones[drone.loc[1]].is_available():
-            #    raise ValueError(
-            #        "trying to move to an inavailable restricted zone")
             return True
+
         # - if the drone in a zone and the connection is free
         #   the action is allowed
         l1, l2 = tuple(sorted((drone.loc, action)))
         if self.connections[(l1, l2)].is_available():
             return True
+
         return False
 
     def validate_sorte_paths(
@@ -239,6 +230,7 @@ class Map(BaseModel):
                     cost += 1
             if valid_path:
                 filtered_solutions[tuple(path)] = cost
+
         # sort and return
         return [path for path in dict(
             sorted(filtered_solutions.items(), key=lambda item: item[1]))]
