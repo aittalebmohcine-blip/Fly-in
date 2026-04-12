@@ -20,7 +20,8 @@ from tools.Definitions import DroneStatus, ZoneType, EdgeType
 
 
 class Map(BaseModel):
-    '''Represents the fly-in map, including all zones, connections, and drones.'''
+    '''Represents the fly-in map, including all zones,
+    connections, and drones.'''
     nb_drones: int = 0
     zones: Dict[str, Zone] = {}
     connections: Dict[Tuple[str, str], Connection] = {}
@@ -104,8 +105,8 @@ class Map(BaseModel):
                         self.connections[drone.loc].currently_trav_append(
                             drone)
                     else:
-                        self.connections[drone.loc].currently_traversing_remove(
-                            drone)
+                        self.connections[
+                            drone.loc].currently_traversing_remove(drone)
                         drone.loc = action
                         self.zones[action].drones_inside_append(drone)
                         drone.path = drone.path[1:]
@@ -133,7 +134,8 @@ class Map(BaseModel):
                                     f"{drone.loc[0]}-{drone.loc[1]} ", "blue")
                 continue
 
-            # Normal movement: the drone can move directly into the target zone.
+            # Normal movement: the drone can
+            # move directly into the target zone.
             if self._is_action_allowed(drone, action):
                 old_loc: str | Tuple[str, str] = drone.loc
                 drone.loc = action
@@ -201,10 +203,12 @@ class Map(BaseModel):
     def _is_restricted_action_allowed(self, drone: Drone, action: str) -> bool:
         """Return True for valid restricted-zone moves."""
         if isinstance(drone.loc, tuple):
-            # Drone is currently waiting in a connection; any target move is allowed.
+            # Drone is currently waiting in a
+            # connection; any target move is allowed.
             return True
 
-        # Otherwise, ensure the connection is free before entering restricted zone.
+        # Otherwise, ensure the connection is
+        # free before entering restricted zone.
         l1, l2 = tuple(sorted((drone.loc, action)))
         if self.connections[(l1, l2)].is_available():
             return True

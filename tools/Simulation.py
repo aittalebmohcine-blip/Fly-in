@@ -1,6 +1,7 @@
 """Simulation orchestration module for Fly_in.
 
-Defines helper routines to compute routes, remove the start node from solutions,
+Defines helper routines to compute routes,
+remove the start node from solutions,
 and support the simulation turn loop.
 """
 from typing import Dict, List, Tuple, Set

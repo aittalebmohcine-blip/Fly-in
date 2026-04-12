@@ -76,7 +76,8 @@ class Parser:
                                     "first valid line must be 'nb_drones'"
                                 )
 
-                        # Handle the known config prefixes and detect duplicates.
+                        # Handle the known config prefixes
+                        # and detect duplicates.
                         if prefix == "nb_drones":
                             if nb_drones_exist:
                                 raise ValueError("Duplicate nb_drones line.")
@@ -102,7 +103,8 @@ class Parser:
                             connection_exist = True
                             connection_lines[lineno] = line
 
-                        # Reject metadata lines that do not match the supported keys.
+                        # Reject metadata lines that do not
+                        # match the supported keys.
                         else:
                             raise ValueError(f"Unknown key '{prefix}'")
 
@@ -145,7 +147,8 @@ class Parser:
             # Separate the line content from its leading prefix.
             line_suf = line.split(":")[1].strip()
 
-            # Tokenize the zone definition into name, x, y, and optional metadata.
+            # Tokenize the zone definition into
+            # name, x, y, and optional metadata.
             l: List[str] = list(map(str.strip, line_suf.split(None, 3)))
 
             # empty zone data
@@ -154,7 +157,8 @@ class Parser:
                     f"Line {lineno}: Invalid zone! "
                     "use '<zone>: <name> <x> <y> [metadata]'")
 
-            # Zone names cannot contain '-' because '-' is reserved for connections.
+            # Zone names cannot contain '-'
+            # because '-' is reserved for connections.
             if "-" in l[0]:
                 raise ValueError(
                     f"Line {lineno}: '-' is not allowed in the zone name")
@@ -265,7 +269,8 @@ class Parser:
                 # Remove brackets and trim whitespace from metadata content.
                 l[1] = l[1][1:-1].strip()
 
-                # Metadata for connections must contain exactly one key=value pair.
+                # Metadata for connections must contain
+                # exactly one key=value pair.
                 if l[1].count("=") != 1:
                     raise ValueError(
                         f"Line {lineno}: Connection metadata must "
@@ -342,6 +347,7 @@ class Parser:
         # remove first and last brackets
         metadata = metadata[1:-1]
         # Define a small helper to validate a single key/value pair.
+
         def validate_kv(k: str, v: str) -> None:
             # ensure k and v are not empty
             if not k or not v:
