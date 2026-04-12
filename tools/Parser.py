@@ -31,6 +31,7 @@ class Parser():
                 start_hub_exist: bool = False
                 end_hub_exist: bool = False
                 nb_drones_exist: bool = False
+                connection_exist: bool = False
                 nb_drones: int = 0
                 zone_lines: Dict[int, str] = {}
                 connection_lines: Dict[int, str] = {}
@@ -95,6 +96,7 @@ class Parser():
                             zone_lines[lineno] = line
                         # add connection to connection_lines
                         elif prefix == "connection":
+                            connection_exist = True
                             connection_lines[lineno] = line
 
                         # error on an unkoun key.
@@ -106,8 +108,8 @@ class Parser():
                         errors.append(f"Line {lineno}: {e}")
 
                 # missing start or end zone
-                for err in self._start_end_zones_existstance(
-                        start_hub_exist, end_hub_exist):
+                for err in self._start_end_connec_existstance(
+                        start_hub_exist, end_hub_exist, connection_exist):
                     errors.append(err)
                 if errors:
                     raise ValueError("\n".join(errors))
@@ -384,8 +386,14 @@ class Parser():
             raise ValueError("nb_drones must be an integer >= 1")
 
     @staticmethod
-    def _start_end_zones_existstance(start: bool, end: bool) -> Iterator[str]:
+    def _start_end_connec_existstance(
+        start: bool,
+        end: bool,
+        conn: bool
+    ) -> Iterator[str]:
         if not start:
             yield ("There must be exactly one start_hub: zone ")
         if not end:
             yield ("There must be exactly one end_hub: zone ")
+        if not conn:
+            yield ("There must be at least one connection")
