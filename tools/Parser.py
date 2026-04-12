@@ -1,3 +1,8 @@
+"""Parser module for Fly_in.
+
+Parses the configuration file, validates zone and connection definitions,
+and builds the central Map model used by the simulation.
+"""
 from typing import List, Any, Dict, Tuple, Iterator
 import os
 
@@ -9,22 +14,22 @@ from tools.Definitions import (
 from tools.Map import Map
 
 
-class Parser():
-    '''reads the file and instantiates Zone, Connection, and Drone objects.'''
+class Parser:
+    '''Reads the file and instantiates Zone, Connection, and Drone objects.'''
 
     def __init__(self, file_path: str) -> None:
+        """Initialize parser with the path to the configuration file."""
         self.file_path: str = file_path
 
     def is_empty_stat(self) -> bool:
+        # Check whether the configuration file contains any content.
         return os.stat(self.file_path).st_size == 0
 
     def parse(self) -> Map:
-        # map: Map = Map()
-        config: Dict[Any, Any] = {}
+        """Parse the input file and return the populated Map object."""
+        config: Dict[str, Any] = {}
 
-        # Logic to read file and return the Map object
         try:
-            # opening the file
             with open(self.file_path, "r") as file:
                 errors: List[str] = []
                 first_valid_line: bool = True
@@ -41,17 +46,18 @@ class Parser():
                 for lineno, line in enumerate(file, 1):
                     line = line.strip()
                     try:
-                        # remove comments
+                        # Ignore blank lines and full-line comments.
                         if not line or line.startswith("#"):
                             continue
+                        # Remove inline comments after a valid statement.
                         if "#" in line:
                             line = line.split("#", 1)[0].strip()
 
-                        # missig ':'
+                        # Every valid config line must contain a ':' separator.
                         if ":" not in line:
                             raise ValueError("missing ':'")
 
-                        # pick the prefix
+                        # Extract the configuration key prefix.
                         prefix: str = line.split(":", 1)[0].strip()
 
                         # - first time to reache this block, means
@@ -60,7 +66,8 @@ class Parser():
                         if first_valid_line:
                             first_valid_line = False
                             if prefix != "nb_drones":
-                                # beffor raising an error, validate that line
+                                # If the first valid entry is not nb_drones,
+                                # remember if it is a start or end hub
                                 if prefix == "start_hub":
                                     start_hub_exist = True
                                 if prefix == "end_hub":
@@ -69,22 +76,19 @@ class Parser():
                                     "first valid line must be 'nb_drones'"
                                 )
 
-                        # duplicat start, end hub or nb_drones
-                        # - check duplicate nb_drones. parse it.
+                        # Handle the known config prefixes and detect duplicates.
                         if prefix == "nb_drones":
                             if nb_drones_exist:
                                 raise ValueError("Duplicate nb_drones line.")
                             nb_drones = self._parse_nb_drones(line)
                             nb_drones_exist = True
 
-                        # - check duplicate nb_drones.
                         elif prefix == "start_hub":
                             if start_hub_exist:
                                 raise ValueError("Duplicate start_hub.")
                             zone_lines[lineno] = line
                             start_hub_exist = True
 
-                        # - check duplicate nb_drones.
                         elif prefix == "end_hub":
                             if end_hub_exist:
                                 raise ValueError("Duplicate end_hub.")
@@ -94,12 +98,11 @@ class Parser():
                         # add hub to zone_lines dict
                         elif prefix == "hub":
                             zone_lines[lineno] = line
-                        # add connection to connection_lines
                         elif prefix == "connection":
                             connection_exist = True
                             connection_lines[lineno] = line
 
-                        # error on an unkoun key.
+                        # Reject metadata lines that do not match the supported keys.
                         else:
                             raise ValueError(f"Unknown key '{prefix}'")
 
@@ -133,17 +136,16 @@ class Parser():
         data: Dict[int, str],
         nb_drones: int
     ) -> Dict[str, Zone]:
-
+        """Create Zone objects from parsed zone lines."""
         zone: Zone
         space: Dict[str, Zone] = {}
         line: str
         raw_names: List[str] = []
         for lineno, line in data.items():
-
-            # remove the prefix
+            # Separate the line content from its leading prefix.
             line_suf = line.split(":")[1].strip()
 
-            # split and strip
+            # Tokenize the zone definition into name, x, y, and optional metadata.
             l: List[str] = list(map(str.strip, line_suf.split(None, 3)))
 
             # empty zone data
@@ -152,12 +154,12 @@ class Parser():
                     f"Line {lineno}: Invalid zone! "
                     "use '<zone>: <name> <x> <y> [metadata]'")
 
-            # make sure there is no '-' in the name
+            # Zone names cannot contain '-' because '-' is reserved for connections.
             if "-" in l[0]:
                 raise ValueError(
                     f"Line {lineno}: '-' is not allowed in the zone name")
 
-            # make sure name does not exists and add it to raw names
+            # Prevent duplicate zone names in the configuration.
             if l[0] in raw_names:
                 raise ValueError(f"Line {lineno}: duplicated zone name")
             raw_names.append(l[0])
@@ -172,6 +174,7 @@ class Parser():
             except ValueError as e:
                 raise ValueError(f"Line {lineno}: {e}")
 
+            # Parse any optional metadata provided for the zone.
             metadata: Dict[
                 str,
                 Any
@@ -182,6 +185,7 @@ class Parser():
             # and the type is start/end
             prefix: str = line.split(":")[0].strip()
             if prefix in {"end_hub", "start_hub"}:
+                # Start and end hubs can hold all drones simultaneously.
                 zone.capacity = nb_drones
                 if prefix == "start_hub":
                     zone.edge = EdgeType.START
@@ -192,10 +196,10 @@ class Parser():
 
     @staticmethod
     def _drones_factory(count: int) -> Dict[str, Drone]:
+        """Build drone objects with unique IDs and waiting status."""
         swarm: Dict[str, Drone] = {}
-        name: str
-        for x in range(count):
-            name = f"D{x}"
+        for index in range(count):
+            name: str = f"D{index}"
             drone: Drone = Drone(
                 id=name,
                 loc="start",
@@ -209,25 +213,22 @@ class Parser():
             data: Dict[int, str],
             zones: Dict[str, Zone]
     ) -> Dict[Tuple[str, str], Connection]:
-
+        """Create Connection objects from parsed connection lines."""
         error_msg = "Invalid connection! use "
         error_msg += "'connection: <name1>-<name2> [metadata]'"
         connections: Dict[Tuple[str, str], Connection] = {}
-        names: Tuple[str, str]
         raw: List[Tuple[str, str]] = []
 
         for lineno, line in data.items():
-
-            # remove the prefix
+            # Remove the 'connection:' prefix from the line.
             line = line.split(":", 1)[1].strip()
             if not line:
                 raise ValueError(f"Line {lineno}: {error_msg}")
 
-            # split and strip
+            # Split into the connected zone pair and optional metadata.
             l: List[str] = list(map(str.strip, line.split(None, 1)))
 
-            # validate conection format
-            # "-" in connection name
+            # connection line must contain a hyphen between zone names.
             if "-" not in l[0]:
                 raise ValueError(error_msg)
 
@@ -247,26 +248,24 @@ class Parser():
                     f"Line {lineno}: Duplicate connection "
                     f"'{names[0]}-{names[1]}'")
             raw.append(names)
-            # are names valid zone names
+            # Validate that both referenced zones exist in the map.
             if not set(names).issubset(set(zones)):
                 raise ValueError(
                     f"Line {lineno}: Connection names must be valid zone names"
                 )
-            # build the connection tuple
             connecte = (zones[names[0]], zones[names[1]])
 
             # verify metadata if exists and build the connection object
             x: int = 1
             if len(l) == 2 and l[1]:  # if metadata exists and is not empty
-
-                # verify brackets exitance
+                # Verify the metadata is wrapped in square brackets.
                 if not l[1].startswith("[") or not l[1].endswith("]"):
                     raise ValueError(f"Line {lineno}: {error_msg}")
 
-                # rmove brackets and strip
+                # Remove brackets and trim whitespace from metadata content.
                 l[1] = l[1][1:-1].strip()
 
-                # error on multiple '=' signe
+                # Metadata for connections must contain exactly one key=value pair.
                 if l[1].count("=") != 1:
                     raise ValueError(
                         f"Line {lineno}: Connection metadata must "
@@ -287,6 +286,7 @@ class Parser():
                 x = self._parse_connection_metadata(value, lineno)
 
             # create the connection obj
+            # Instantiate a Connection object for the current link.
             connection: Connection = Connection(
                 connecete=connecte,
                 max_link_capacity=x,
@@ -297,6 +297,7 @@ class Parser():
 
     @staticmethod
     def _parse_connection_metadata(data: str, i: int) -> int:
+        """Parse and validate the connection max_link_capacity metadata."""
         try:
             x: int = int(data)
             if x < 1:
@@ -311,9 +312,9 @@ class Parser():
             metadata: str,
             lineno: int
     ) -> Dict[str, Any]:
+        """Parse and validate optional zone metadata from a bracketed value."""
         error_msg = f"Line {lineno}: Invalid metadata format. "
-        error_msg += "example usage '[type=zone]' (3 key value paires at most)"
-        # default metadata
+        error_msg += "example usage '[type=zone]' (3 key value pairs at most)"
         result: Dict[str, Any] = {
             "type": ZoneType.NORMAL,
             "capacity": 1,
@@ -340,13 +341,12 @@ class Parser():
             raise ValueError(error_msg)
         # remove first and last brackets
         metadata = metadata[1:-1]
-        # sub validation func
-
+        # Define a small helper to validate a single key/value pair.
         def validate_kv(k: str, v: str) -> None:
             # ensure k and v are not empty
             if not k or not v:
                 raise ValueError(error_msg)
-            # udates parent func vars if k,v are valid else raises error
+            # update parent function state after validation
             # get the enum key
             try:
                 key = ZoneMetadataKeys(k)
@@ -381,6 +381,8 @@ class Parser():
             result[k] = value
             # print(result.keys())
 
+        # Since metadata may contain multiple key/value pairs, split on the
+        # correct boundaries while preserving values with spaces.
         def split_at_indices(
                 target: List[str],
                 split_indices: List[int]
@@ -418,6 +420,7 @@ class Parser():
 
     @staticmethod
     def _parse_coords(x: str, y: str) -> Point:
+        """Convert coordinate strings to a tuple of integers."""
         try:
             return (int(x), int(y))
         except Exception:
@@ -425,6 +428,7 @@ class Parser():
 
     @staticmethod
     def _parse_nb_drones(line: str) -> int:
+        """Extract and validate the number of drones from the config line."""
         try:
             x: str = line.split(":", 1)[1]
             if int(x) < 1:
@@ -439,9 +443,10 @@ class Parser():
         end: bool,
         conn: bool
     ) -> Iterator[str]:
+        """Validate that required start/end hubs and a connection exist."""
         if not start:
-            yield ("There must be exactly one start_hub: zone ")
+            yield "There must be exactly one start_hub: zone "
         if not end:
-            yield ("There must be exactly one end_hub: zone ")
+            yield "There must be exactly one end_hub: zone "
         if not conn:
-            yield ("There must be at least one connection")
+            yield "There must be at least one connection"

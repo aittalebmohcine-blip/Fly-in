@@ -1,3 +1,4 @@
+"""Shared definitions and enumeration values for Fly_in."""
 from typing import Tuple
 from enum import Enum
 

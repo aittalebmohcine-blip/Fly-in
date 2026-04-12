@@ -1,50 +1,47 @@
+"""Simulation orchestration module for Fly_in.
+
+Defines helper routines to compute routes, remove the start node from solutions,
+and support the simulation turn loop.
+"""
 from typing import Dict, List, Tuple, Set
 from tools.Connection import Connection
 
 
-class Simulation():
+class Simulation:
     '''The conductor of the system.
-    Responsibility:
-    Manage the "Turn" loop.
-    It asks every Drone what it wants to do,
-    asks every Zone/Connection if that action is allowed,
-    updates the state, and prints the output.'''
+    Manages the turn loop and path discovery operations.'''
 
     @staticmethod
     def remove_start_from_solutions(
         solutions: List[List[str]]
     ) -> None:
+        """Remove the initial start node from each valid path."""
         for solution in solutions:
             solution.pop(0)
 
     @classmethod
     def find_all_paths(
         cls,
-        graph: Dict[str, list[Tuple[str, Connection]]],
+        graph: Dict[str, List[Tuple[str, Connection]]],
         start: str,
         end: str
     ) -> List[List[str]]:
+        """Breadth-first search to discover all simple paths between nodes."""
         all_paths: List[List[str]] = []
-        # Stack stores tuples: (current_node, path_so_far, visited_nodes)
+        # Use a DFS stack to explore all possible simple paths.
         stack: List[Tuple[str, List[str], Set[str]]] = [
             (start, [start], {start})]
-        current: str
-        path: List[str]
-        visited: Set[str]
 
         while stack:
             current, path, visited = stack.pop()
-
             if current == end:
                 all_paths.append(path)
                 continue
 
             for neighbor, _ in graph[current]:
-                # Assume graph[zone] returns list of connected zones
-                # Check if neighbor is blocked or already visited in this path
                 if neighbor not in visited:
-                    new_path = path + [neighbor]
-                    new_visited = visited | {neighbor}
+                    new_path: List[str] = path + [neighbor]
+                    new_visited: Set[str] = visited | {neighbor}
                     stack.append((neighbor, new_path, new_visited))
 
         return all_paths
@@ -55,15 +52,10 @@ class Simulation():
             start_zone: str,
             end_zone: str
     ) -> List[str]:
-        # maybe convert the string path to a list of points
-        # - cu = end
-        curent_location: str = end_zone
+        """Reconstruct a path from parent pointers."""
+        current_location: str = end_zone
         result: List[str] = []
-        # - while cu != start:
-        while curent_location != start_zone:
-            # - result.append(cu)
-            result.append(curent_location)
-            # cu = parent[cu]
-            curent_location = parent[curent_location]
-            # - reverse result and return it
+        while current_location != start_zone:
+            result.append(current_location)
+            current_location = parent[current_location]
         return result[::-1]

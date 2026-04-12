@@ -1,3 +1,8 @@
+"""Drone model for Fly_in.
+
+Describes the individual drone state including ID, current location,
+status, and route path.
+"""
 from typing import Tuple
 from tools.Definitions import DroneStatus
 try:
@@ -9,14 +14,9 @@ except ImportError:
 
 
 class Drone(BaseModel):
-    '''Represents a single drone.
-    Responsibility:
-    Track its own ID, current location,
-    status (moving, waiting, delivered), and path.
-    It decides when to move based on its internal state.'''
+    '''Represents a single drone and its current route state.'''
 
     id: str
-    # loc: Point
     loc: str | Tuple[str, str]  # zone name or a connection entry
     status: DroneStatus
     path: Tuple[str, ...] = ()

@@ -1,3 +1,8 @@
+"""Zone data model used by the Fly_in simulation.
+
+Each Zone tracks its coordinates, type, capacity, color, and the drones
+currently inside it. The model exposes convenience methods for zone access.
+"""
 from typing import List
 from pydantic import BaseModel
 
@@ -8,12 +13,7 @@ from tools.Drone import Drone
 
 class Zone(BaseModel):
     '''Represents a physical location (Hub, Start, End, Restricted, etc.).
-    Responsibility:
-    Know its coordinates,
-    type (normal/blocked/restricted/priority),
-    capacity limits (max_drones),
-    and which drones are currently inside it.
-    It validates if a drone can enter.'''
+    Stores coordinates, type, capacity, current drones, and display color.'''
 
     coords: Point
     type: ZoneType
@@ -23,15 +23,14 @@ class Zone(BaseModel):
     color: str
 
     def is_available(self) -> bool:
-        if self.capacity - len(self.drones_inside) > 0:
-            return True
-        return False
+        """Return True when the zone can accept another drone."""
+        return self.capacity > len(self.drones_inside)
 
-    # func to append a drone
     def drones_inside_append(self, drone: Drone) -> None:
+        """Add a drone to the list of drones currently inside this zone."""
         self.drones_inside.append(drone)
 
-    # func to remove a drone
     def drones_inside_remove(self, drone: Drone) -> None:
+        """Remove a drone from the zone if it is currently present."""
         if drone in self.drones_inside:
             self.drones_inside.remove(drone)
