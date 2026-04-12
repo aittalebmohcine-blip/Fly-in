@@ -143,7 +143,8 @@ class Parser():
             # validate format
             if len(l) < 3:
                 raise ValueError(
-                    "Invalid zone! use '<zone>: <name> <x> <y> [metadata]'")
+                    f"Line {lineno}: Invalid zone! "
+                    "use '<zone>: <name> <x> <y> [metadata]'")
             coords: Point = self._parse_coords(l[1], l[2])
 
             metadata: Dict[
