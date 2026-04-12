@@ -1,4 +1,5 @@
 from typing import List, Any, Dict, Tuple, Iterator
+import os
 
 from tools.Drone import Drone
 from tools.Connection import Connection
@@ -13,6 +14,9 @@ class Parser():
 
     def __init__(self, file_path: str) -> None:
         self.file_path: str = file_path
+
+    def is_empty_stat(self) -> bool:
+        return os.stat(self.file_path).st_size == 0
 
     def parse(self) -> Map:
         # map: Map = Map()
