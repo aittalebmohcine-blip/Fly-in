@@ -202,25 +202,36 @@ class Parser():
             data: Dict[int, str],
             zones: Dict[str, Zone]
     ) -> Dict[Tuple[str, str], Connection]:
+
         error_msg = "Invalid connection! use "
         error_msg += "'connection: <name1>-<name2> [metadata]'"
         connections: Dict[Tuple[str, str], Connection] = {}
         names: Tuple[str, str]
         raw: List[Tuple[str, str]] = []
+
         for lineno, line in data.items():
+
             # remove the prefix
             line = line.split(":", 1)[1].strip()
             if not line:
                 raise ValueError(f"Line {lineno}: {error_msg}")
+
             # split and strip
             l: List[str] = list(map(str.strip, line.split(None, 1)))
+
             # validate conection format
             # "-" in connection name
             if "-" not in l[0]:
                 raise ValueError(error_msg)
+
             # get the two zone names and ensure they are stripped
             z1, z2 = tuple(map(str.strip, l[0].split("-", 1)))
             names = (z1, z2)
+            if z1 == z2:
+                raise ValueError(
+                    f"Line {lineno}: self-referencing connection not allowed"
+                )
+
             # ensure order is consistent for undirected connection
             names = (names[0], names[1]) if names[0] < names[1] else (
                 names[1], names[0])
