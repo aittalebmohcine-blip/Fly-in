@@ -1,4 +1,3 @@
-from re import I
 from typing import Tuple
 from tools.Definitions import DroneStatus
 try:
