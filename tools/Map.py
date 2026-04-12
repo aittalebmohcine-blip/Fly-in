@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from tools.Drone import Drone
 from tools.Connection import Connection
 from tools.Zone import Zone
-from tools.Definitions import DroneStatus, ZoneType
+from tools.Definitions import DroneStatus, ZoneType, EdgeType
 
 
 class Map(BaseModel):
@@ -15,6 +15,43 @@ class Map(BaseModel):
     connections: Dict[Tuple[str, str], Connection] = {}
     drones: Dict[str, Drone] = {}
     graph: Dict[str, list[Tuple[str, Connection]]] = {}
+
+    def verify_start_goal_in_graph(self) -> None:
+        start, goal = self.extract_start_goal_names()
+        s_exist: bool = False
+        g_exist: bool = False
+        for node in self.graph.keys():
+            if node == start:
+                s_exist = True
+            elif node == goal:
+                g_exist = True
+        if not all((s_exist, g_exist)):
+            raise RuntimeError(
+                "GRAPH ERROR: make sure there is a "
+                "link between start and end hubs")
+
+    def extract_start_goal_names(self) -> Tuple[str, str]:
+        start: str = ""
+        goal: str = ""
+        for zone in self.zones:
+            if self.zones[zone].edge == EdgeType.START:
+                start = zone
+            if self.zones[zone].edge == EdgeType.END:
+                goal = zone
+        return (start, goal)
+
+    @staticmethod
+    def verify_solutions(
+        solutions: List[List[str]],
+        start: str,
+        goal: str
+    ) -> None:
+        for solution in solutions:
+            if solution[0] == start and solution[-1] == goal:
+                return
+        raise RuntimeError(
+            "GRAPH ERROR: make sure there is a link between start and end hubs"
+        )
 
     def build_graph(self) -> None:
         connection: tuple[str, str]

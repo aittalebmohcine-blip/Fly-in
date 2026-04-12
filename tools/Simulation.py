@@ -10,6 +10,13 @@ class Simulation():
     asks every Zone/Connection if that action is allowed,
     updates the state, and prints the output.'''
 
+    @staticmethod
+    def remove_start_from_solutions(
+        solutions: List[List[str]]
+    ) -> None:
+        for solution in solutions:
+            solution.pop(0)
+
     @classmethod
     def find_all_paths(
         cls,
@@ -29,8 +36,6 @@ class Simulation():
             current, path, visited = stack.pop()
 
             if current == end:
-                # remove the start zone as all drones have that pos by default
-                path.pop(0)
                 all_paths.append(path)
                 continue
 
