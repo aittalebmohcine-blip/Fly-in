@@ -42,28 +42,28 @@
 - [x] Reject malformed key-value pairs (missing `=`, missing value, missing spaces between tags).
 
 ## 6. Connection Syntax & References
-- [ ] Reject connections missing the `connection:` prefix.
-- [ ] Reject connections missing one or both zone names.
-- [ ] Reject connections referencing zones that were not previously defined.
-- [ ] Reject connections where a zone name contains a dash (subject explicitly forbids this).
-- [ ] Reject self-referencing connections (`connection: zone1-zone1`).
-- [ ] Reject duplicate connections (`a-b` followed by `a-b`).
-- [ ] Reject duplicate bidirectional connections (`a-b` followed by `b-a`).
-- [ ] Verify connections are parsed as bidirectional.
+- [x] Reject connections missing the `connection:` prefix.
+- [x] Reject connections missing one or both zone names.
+- [x] Reject connections referencing zones that were not previously defined.
+- [x] Reject connections where a zone name contains a dash (subject explicitly forbids this).
+- [x] Reject self-referencing connections (`connection: zone1-zone1`).
+- [x] Reject duplicate connections (`a-b` followed by `a-b`).
+- [x] Reject duplicate bidirectional connections (`a-b` followed by `b-a`).
+- [x] Verify connections are parsed as bidirectional.
 
 ## 7. Connection Metadata & Integrity
-- [ ] Accept missing connection metadata and apply default (`max_link_capacity=1`).
-- [ ] Reject `max_link_capacity=` values that are not positive integers (`0`, negative, floats, strings).
-- [ ] Reject malformed connection metadata brackets.
-- [ ] Reject unknown keys inside connection metadata brackets.
+- [x] Accept missing connection metadata and apply default (`max_link_capacity=1`).
+- [x] Reject `max_link_capacity=` values that are not positive integers (`0`, negative, floats, strings).
+- [x] Reject malformed connection metadata brackets.
+- [x] Reject unknown keys inside connection metadata brackets.
 - [ ] Verify metadata is correctly associated with the specific connection.
 
 ## 8. Comments & Whitespace Handling
-- [ ] Ignore lines starting with `#`.
-- [ ] Ignore completely empty lines anywhere in the file.
-- [ ] Verify correct parsing with leading/trailing whitespace on valid lines.
-- [ ] Verify correct parsing with multiple spaces between tokens.
-- [ ] Reject inline comments if not explicitly supported (subject states "Comments start with '#'").
+- [x] Ignore lines starting with `#`.
+- [x] Ignore completely empty lines anywhere in the file.
+- [x] Verify correct parsing with leading/trailing whitespace on valid lines.
+- [x] Verify correct parsing with multiple spaces between tokens.
+- [x] Reject inline comments if not explicitly supported (subject states "Comments start with '#'").
 
 ## 9. Error Handling & Output Compliance
 - [ ] Verify program terminates immediately on the first parsing error.
