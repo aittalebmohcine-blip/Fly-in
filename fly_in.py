@@ -1,9 +1,11 @@
-import copy
 from typing import List, Tuple
+import sys
+# import os
+import copy
+
 from tools.Definitions import EdgeType
 from tools.Parser import Parser
 from tools.Simulation import Simulation
-import sys
 
 
 def main() -> None:
@@ -14,8 +16,14 @@ def main() -> None:
     file_path = sys.argv[1]
 
     try:
+
         # parsing
         parser = Parser(file_path)
+
+        # file is empty
+        if parser.is_empty_stat():
+            raise RuntimeError("ERROR: Empty config file !")
+
         map = parser.parse()
 
         # simulating
@@ -50,7 +58,7 @@ def main() -> None:
             print(f"Turn {i}: ", map.advance_turn())
 
     except Exception as e:
-        raise e
+        # raise e
         print(e)
         return
 
