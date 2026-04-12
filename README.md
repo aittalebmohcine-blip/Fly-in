@@ -1,102 +1,104 @@
-# To Do
-- [ ] docstrings
-- [ ] documentation
-- [ ] understand the algorithm
-- [x] flake8
-- [x] mypy
-- [x] parsing
+*This project has been created as part of the 42 curriculum by mait-tal.*
 
-- file permission
+# Fly_in
 
-# Extracting
+## Description
+I built a drone route simulation that reads a structured configuration file and simulates deliveries across a small network of zones.
 
-- colors provided => visual feedback (p10-colors)
-  - what do they mean by visual feedback?
-    - (p11-pathfinding) Visual Representation: Your implementation must provide visual feedback of the simulation, either through:
-      - Colored terminal output showing drone movements and zone states
-      - A graphical interface displaying the network and drone positions
-      - Both options for enhanced user experience
+The program parses a map definition with `start_hub`, `end_hub`, regular `hub` zones, and bidirectional `connection` links. Each zone can include metadata such as type, capacity, and display color. I then compute valid routes, sort them by cost and priority, and assign routes to drones before running a turn-based simulation.
 
-      - what do they mean by deadlocks (p11-pathfinding)
+## Instructions
 
+### Requirements
+- Python 3
+- `pydantic`
+- `termcolor`
 
+You can install dependencies with:
 
-# Fly-in Parser Testing Checklist
+```bash
+pip install -r requirements.txt
+```
 
-## 1. Initialization & File Structure
-- [x] Reject empty files.
-- [x] Reject files missing `nb_drones:` entirely.
-- [x] Verify `nb_drones:` is strictly the first valid line (before any zone/connection).
-- [x] Reject files with unknown prefixes or unrecognized line formats.
-- [x] Verify handling of files with no connections or no intermediate hubs.
+### Run the project
 
-## 2. `nb_drones` Validation
-- [x] Reject non-integer values (e.g., floats, strings, empty).
-- [x] Reject zero or negative integers.
-- [x] Reject missing value after colon (`nb_drones:`).
-- [ ] Reject whitespace between key, colon, and value (`nb_drones : 5` or `nb_drones:  5` if strict).
-- [x] Accept valid positive integers.
+From the repository root, run:
 
-## 3. Zone Definition Syntax
-- [x] Reject lines missing type prefix (`start_hub:`, `end_hub:`, `hub:`).
-- [x] Reject misspelled or case-mismatched prefixes.
-- [x] Reject zones missing name, X, or Y coordinate.
-- [x] Reject coordinates that are not integers (floats, letters, symbols).
-- [x] Reject zones with trailing metadata missing opening/closing brackets.
-- [x] Reject lines with multiple metadata blocks or malformed bracket syntax.
+```bash
+python3 fly_in.py <config-file>
+```
 
-## 4. Zone Names & Coordinates
-- [x] Reject zone names containing dashes (`-`).
-- [x] Reject zone names containing spaces.
-- [x] Reject duplicate zone names across the entire file.
-- [x] Verify coordinates are stored/parsed as exact integers.
-- [x] Verify exactly one `start_hub:` exists in the file.
-- [x] Verify exactly one `end_hub:` exists in the file.
-- [x] Reject files with zero `start_hub:` or zero `end_hub:`.
-- [x] Reject files with multiple `start_hub:` or `end_hub:`.
+For example:
 
-## 5. Zone Metadata Parsing
-- [x] Accept missing metadata block and apply defaults (`zone=normal`, `max_drones=1`, `color` unspecified).
-- [x] Accept metadata tags in any order inside brackets.
-- [x] Reject invalid `zone=` values (must be strictly `normal`, `blocked`, `restricted`, or `priority`).
-- [x] Reject `max_drones=` values that are not positive integers (`0`, negative, floats, strings).
-- [ ] Reject `color=` values containing spaces or multiple words.
-- [x] Reject unknown keys inside zone metadata brackets.
-- [x] Reject malformed key-value pairs (missing `=`, missing value, missing spaces between tags).
+```bash
+python3 fly_in.py maps/easy/01_linear_path.txt
+```
 
-## 6. Connection Syntax & References
-- [x] Reject connections missing the `connection:` prefix.
-- [x] Reject connections missing one or both zone names.
-- [x] Reject connections referencing zones that were not previously defined.
-- [x] Reject connections where a zone name contains a dash (subject explicitly forbids this).
-- [x] Reject self-referencing connections (`connection: zone1-zone1`).
-- [x] Reject duplicate connections (`a-b` followed by `a-b`).
-- [x] Reject duplicate bidirectional connections (`a-b` followed by `b-a`).
-- [x] Verify connections are parsed as bidirectional.
+### Input format
 
-## 7. Connection Metadata & Integrity
-- [x] Accept missing connection metadata and apply default (`max_link_capacity=1`).
-- [x] Reject `max_link_capacity=` values that are not positive integers (`0`, negative, floats, strings).
-- [x] Reject malformed connection metadata brackets.
-- [x] Reject unknown keys inside connection metadata brackets.
-- [ ] Verify metadata is correctly associated with the specific connection.
+The config file must start with:
 
-## 8. Comments & Whitespace Handling
-- [x] Ignore lines starting with `#`.
-- [x] Ignore completely empty lines anywhere in the file.
-- [x] Verify correct parsing with leading/trailing whitespace on valid lines.
-- [x] Verify correct parsing with multiple spaces between tokens.
-- [x] Reject inline comments if not explicitly supported (subject states "Comments start with '#'").
+```text
+nb_drones: <number>
+```
 
-## 9. Error Handling & Output Compliance
-- [ ] Verify program terminates immediately on the first parsing error.
-- [x] Verify error output is written to stderr (or clear console output) without a Python traceback/crash.
-- [x] Verify every error message explicitly states the exact line number.
-- [x] Verify every error message explicitly states the exact cause of failure.
-- [x] Verify no partial state is processed or simulated after an error.
+Then it can include zone definitions like:
 
-## 10. Valid Baseline Verification
-- [x] Parse the provided example map successfully without warnings.
-- [x] Verify all zone attributes (name, type, coords, metadata) match expected defaults/overrides.
-- [x] Verify all connections are correctly linked and bidirectional.
-- [x] Verify parsed graph structure matches logical expectation for downstream simulation.
+```text
+start_hub: A 0 0 [type=normal color=green max_drones=2]
+hub: B 1 0 [type=priority color=yellow]
+end_hub: Z 2 0
+```
+
+And connection definitions like:
+
+```text
+connection: A-B
+connection: B-Z [max_link_capacity=2]
+```
+
+Comments beginning with `#` are ignored.
+
+## Algorithm choices and implementation strategy
+
+I focused on a few clear steps:
+
+1. **Parsing and validation**
+   - I parse every line and reject invalid formats or duplicate definitions.
+   - I validate `nb_drones` first, require exactly one `start_hub` and `end_hub`, and verify connections reference existing zones.
+
+2. **Graph construction**
+   - I store zones and connections in a map model.
+   - I build an undirected adjacency list for the network.
+
+3. **Route discovery**
+   - I compute all simple paths from start to end using a path search over the graph.
+   - I remove the `start` node from assigned routes because drones already begin there.
+
+4. **Route scoring**
+   - I filter out routes with blocked zones.
+   - I increase the route cost for restricted zones.
+   - I sort remaining routes by cost and by the number of priority zones.
+
+5. **Drone assignment and simulation**
+   - I assign drones to routes based on the sorted, filtered path list.
+   - The simulation advances turn by turn until every drone reaches the end.
+
+## Visual representation features
+
+The simulation prints colored terminal output so I can track drone movement and zone states.
+
+- Drones are shown with their current location.
+- Zone colors are applied when available.
+- This color-based feedback helps me see route progress and identify restricted or normal zone transitions.
+
+## Resources
+
+- Python documentation: https://docs.python.org/3/
+- Pydantic: https://pydantic-docs.helpmanual.io/
+- Termcolor: https://pypi.org/project/termcolor/
+- Graph traversal concepts: depth-first and breadth-first search
+
+## AI usage
+
+I used AI to help write and organize documentation, and to improve comments in the code. The algorithm logic and the implementation details remain based on my own project design.
