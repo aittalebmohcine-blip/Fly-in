@@ -247,25 +247,39 @@ class Parser():
                 )
             # build the connection tuple
             connecte = (zones[names[0]], zones[names[1]])
+
             # verify metadata if exists and build the connection object
             x: int = 1
             if len(l) == 2 and l[1]:  # if metadata exists and is not empty
-                # rmove brackets and strip
+
+                # verify brackets exitance
                 if not l[1].startswith("[") or not l[1].endswith("]"):
                     raise ValueError(f"Line {lineno}: {error_msg}")
+
+                # rmove brackets and strip
                 l[1] = l[1][1:-1].strip()
-                # metadata must start with max_link_capacity
+
+                # error on multiple '=' signe
                 if l[1].count("=") != 1:
                     raise ValueError(
                         f"Line {lineno}: Connection metadata must "
                         "contain exactly one key-value pair"
                     )
-                if not l[1].startswith("max_link_capacity"):
+
+                # metadata must start with max_link_capacity
+                key: str
+                value: str
+                key, value = list(map(str.strip, l[1].split("=", 1)))
+                if key != "max_link_capacity":
                     raise ValueError(
                         f"Line {lineno}: Wrong metadata key! "
                         "only 'max_link_capacity' is allowed"
                     )
-                x = self._parse_connection_metadata(l[1], lineno)
+
+                # parse the capacity value
+                x = self._parse_connection_metadata(value, lineno)
+
+            # create the connection obj
             connection: Connection = Connection(
                 connecete=connecte,
                 max_link_capacity=x,
@@ -277,7 +291,7 @@ class Parser():
     @staticmethod
     def _parse_connection_metadata(data: str, i: int) -> int:
         try:
-            x: int = int(data.split("=", 1)[1].strip())
+            x: int = int(data)
             if x < 1:
                 raise ValueError()
             return x
