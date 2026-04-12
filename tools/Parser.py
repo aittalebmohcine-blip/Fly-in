@@ -210,6 +210,8 @@ class Parser():
         for lineno, line in data.items():
             # remove the prefix
             line = line.split(":", 1)[1].strip()
+            if not line:
+                raise ValueError(f"Line {lineno}: {error_msg}")
             # split and strip
             l: List[str] = list(map(str.strip, line.split(None, 1)))
             # validate conection format

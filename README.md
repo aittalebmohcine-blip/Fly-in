@@ -33,13 +33,13 @@
 - [x] Reject files with multiple `start_hub:` or `end_hub:`.
 
 ## 5. Zone Metadata Parsing
-- [ ] Accept missing metadata block and apply defaults (`zone=normal`, `max_drones=1`, `color` unspecified).
-- [ ] Accept metadata tags in any order inside brackets.
-- [ ] Reject invalid `zone=` values (must be strictly `normal`, `blocked`, `restricted`, or `priority`).
-- [ ] Reject `max_drones=` values that are not positive integers (`0`, negative, floats, strings).
+- [x] Accept missing metadata block and apply defaults (`zone=normal`, `max_drones=1`, `color` unspecified).
+- [x] Accept metadata tags in any order inside brackets.
+- [x] Reject invalid `zone=` values (must be strictly `normal`, `blocked`, `restricted`, or `priority`).
+- [x] Reject `max_drones=` values that are not positive integers (`0`, negative, floats, strings).
 - [ ] Reject `color=` values containing spaces or multiple words.
-- [ ] Reject unknown keys inside zone metadata brackets.
-- [ ] Reject malformed key-value pairs (missing `=`, missing value, missing spaces between tags).
+- [x] Reject unknown keys inside zone metadata brackets.
+- [x] Reject malformed key-value pairs (missing `=`, missing value, missing spaces between tags).
 
 ## 6. Connection Syntax & References
 - [ ] Reject connections missing the `connection:` prefix.
