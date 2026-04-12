@@ -1,3 +1,26 @@
+# To Do
+- [ ] docstrings
+- [ ] documentation
+- [ ] understand the algorithm
+- [x] flake8
+- [x] mypy
+- [x] parsing
+
+- file permission
+
+# Extracting
+
+- colors provided => visual feedback (p10-colors)
+  - what do they mean by visual feedback?
+    - (p11-pathfinding) Visual Representation: Your implementation must provide visual feedback of the simulation, either through:
+      - Colored terminal output showing drone movements and zone states
+      - A graphical interface displaying the network and drone positions
+      - Both options for enhanced user experience
+
+      - what do they mean by deadlocks (p11-pathfinding)
+
+
+
 # Fly-in Parser Testing Checklist
 
 ## 1. Initialization & File Structure
@@ -77,52 +100,3 @@
 - [x] Verify all zone attributes (name, type, coords, metadata) match expected defaults/overrides.
 - [x] Verify all connections are correctly linked and bidirectional.
 - [x] Verify parsed graph structure matches logical expectation for downstream simulation.
-
-
-
-
-
-
-# To Do
-- [x] flake8
-- [x] mypy
-- [ ] parsing
-  - 
-- [ ] docstrings
-- [ ] documentation
-- [ ] understand the algorithm
-
-- file permission
-- test benchmarks
-- drone stoping in a connection(restricted zones)
-- preiority zones are prefered in path finding
-- unique names
-
-# Extracting
-
-- colors provided => visual feedback (p10-colors)
-  - what do they mean by visual feedback?
-    - (p11-pathfinding) Visual Representation: Your implementation must provide visual feedback of the simulation, either through:
-      - Colored terminal output showing drone movements and zone states
-      - A graphical interface displaying the network and drone positions
-      - Both options for enhanced user experience
-
-      - what do they mean by deadlocks (p11-pathfinding)
-- 
-
-
-
----
-
-
-
-
-# Fly-in
-efficient drone routing system 
-
-keep in mind:
-- handle exceptions.
-- context managers.
-- type hints : funcs params and returns, vars.
-- funcs must pass mypy.
-- doc strings in funcs and classes to document purpose, parameters, and returns.
