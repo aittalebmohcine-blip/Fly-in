@@ -1,11 +1,11 @@
 # Fly-in Parser Testing Checklist
 
 ## 1. Initialization & File Structure
-- [ ] Reject empty files.
-- [ ] Reject files missing `nb_drones:` entirely.
-- [ ] Verify `nb_drones:` is strictly the first valid line (before any zone/connection).
-- [ ] Reject files with unknown prefixes or unrecognized line formats.
-- [ ] Verify handling of files with no connections or no intermediate hubs.
+- [x] Reject empty files.
+- [x] Reject files missing `nb_drones:` entirely.
+- [x] Verify `nb_drones:` is strictly the first valid line (before any zone/connection).
+- [x] Reject files with unknown prefixes or unrecognized line formats.
+- [x] Verify handling of files with no connections or no intermediate hubs.
 
 ## 2. `nb_drones` Validation
 - [ ] Reject non-integer values (e.g., floats, strings, empty).
