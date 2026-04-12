@@ -67,16 +67,16 @@
 
 ## 9. Error Handling & Output Compliance
 - [ ] Verify program terminates immediately on the first parsing error.
-- [ ] Verify error output is written to stderr (or clear console output) without a Python traceback/crash.
-- [ ] Verify every error message explicitly states the exact line number.
-- [ ] Verify every error message explicitly states the exact cause of failure.
-- [ ] Verify no partial state is processed or simulated after an error.
+- [x] Verify error output is written to stderr (or clear console output) without a Python traceback/crash.
+- [x] Verify every error message explicitly states the exact line number.
+- [x] Verify every error message explicitly states the exact cause of failure.
+- [x] Verify no partial state is processed or simulated after an error.
 
 ## 10. Valid Baseline Verification
-- [ ] Parse the provided example map successfully without warnings.
-- [ ] Verify all zone attributes (name, type, coords, metadata) match expected defaults/overrides.
-- [ ] Verify all connections are correctly linked and bidirectional.
-- [ ] Verify parsed graph structure matches logical expectation for downstream simulation.
+- [x] Parse the provided example map successfully without warnings.
+- [x] Verify all zone attributes (name, type, coords, metadata) match expected defaults/overrides.
+- [x] Verify all connections are correctly linked and bidirectional.
+- [x] Verify parsed graph structure matches logical expectation for downstream simulation.
 
 
 
