@@ -137,17 +137,33 @@ class Parser():
         zone: Zone
         space: Dict[str, Zone] = {}
         line: str
+        raw_names: List[str] = []
         for lineno, line in data.items():
+
             # remove the prefix
             line_suf = line.split(":")[1].strip()
+
             # split and strip
             l: List[str] = list(map(str.strip, line_suf.split(None, 3)))
+
+            # make sure there is no '-' in the name
+            if "-" in l[0]:
+                raise ValueError(
+                    f"Line {lineno}: '-' is not allowed in the zone name")
+            # make sure name does not exists and add it to raw names
+            if l[0] in raw_names:
+                raise ValueError(f"Line {lineno}: duplicated zone name")
+            raw_names.append(l[0])
+
             # validate format
             if len(l) < 3:
                 raise ValueError(
                     f"Line {lineno}: Invalid zone! "
                     "use '<zone>: <name> <x> <y> [metadata]'")
-            coords: Point = self._parse_coords(l[1], l[2])
+            try:
+                coords: Point = self._parse_coords(l[1], l[2])
+            except ValueError as e:
+                raise ValueError(f"Line {lineno}: {e}")
 
             metadata: Dict[
                 str,
