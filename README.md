@@ -67,6 +67,33 @@ connection: B-Z [max_link_capacity=2]
 
 Comments beginning with `#` are ignored.
 
+## Example
+
+### Input
+```text
+# Easy Level 1: Simple linear path
+nb_drones: 2
+
+start_hub: start 0 0 [color=green]
+hub: waypoint1 1 0 [color=blue]
+hub: waypoint2 2 0 [color=blue]
+end_hub: goal 3 0 [color=red]
+
+connection: start-waypoint1
+connection: waypoint1-waypoint2
+connection: waypoint2-goal
+```
+
+### Expected Output
+```
+---initialization done, starting simulation...---
+
+Turn 1:  D0-waypoint1 
+Turn 2:  D0-waypoint2 D1-waypoint1 
+Turn 3:  D0-goal D1-waypoint2 
+Turn 4:  D1-goal
+```
+
 ## Algorithm choices and implementation strategy
 
 I focused on a few clear steps:
