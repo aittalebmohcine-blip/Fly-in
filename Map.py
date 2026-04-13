@@ -13,10 +13,10 @@ from pydantic import BaseModel
 
 from typing import Dict, Tuple, List
 
-from tools.Drone import Drone
-from tools.Connection import Connection
-from tools.Zone import Zone
-from tools.Definitions import DroneStatus, ZoneType, EdgeType
+from Drone import Drone
+from Connection import Connection
+from Zone import Zone
+from Definitions import DroneStatus, ZoneType, EdgeType
 
 
 class Map(BaseModel):

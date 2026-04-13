@@ -4,7 +4,7 @@ Describes the individual drone state including ID, current location,
 status, and route path.
 """
 from typing import Tuple
-from tools.Definitions import DroneStatus
+from Definitions import DroneStatus
 try:
     from pydantic import BaseModel
 except ImportError:

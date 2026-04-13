@@ -5,7 +5,7 @@ remove the start node from solutions,
 and support the simulation turn loop.
 """
 from typing import Dict, List, Tuple, Set
-from tools.Connection import Connection
+from Connection import Connection
 
 
 class Simulation:

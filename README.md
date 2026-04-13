@@ -31,7 +31,7 @@ python3 fly_in.py <config-file>
 For example:
 
 ```bash
-python3 fly_in.py maps/easy/01_linear_path.txt
+python3 fly_in.py easy_01_linear_path.txt
 ```
 
 ### Input format

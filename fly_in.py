@@ -3,8 +3,8 @@ import sys
 import copy
 
 
-from tools.Parser import Parser
-from tools.Simulation import Simulation
+from Parser import Parser
+from Simulation import Simulation
 
 
 def main() -> None:

@@ -6,8 +6,8 @@ moving through the connection.
 from typing import Optional, Tuple, List
 from pydantic import BaseModel
 
-from tools.Drone import Drone
-from tools.Zone import Zone
+from Drone import Drone
+from Zone import Zone
 
 
 class Connection(BaseModel):

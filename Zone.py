@@ -7,8 +7,8 @@ from typing import List
 from pydantic import BaseModel
 
 
-from tools.Definitions import Point, ZoneType, EdgeType
-from tools.Drone import Drone
+from Definitions import Point, ZoneType, EdgeType
+from Drone import Drone
 
 
 class Zone(BaseModel):

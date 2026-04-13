@@ -6,12 +6,12 @@ and builds the central Map model used by the simulation.
 from typing import List, Any, Dict, Tuple, Iterator
 import os
 
-from tools.Drone import Drone
-from tools.Connection import Connection
-from tools.Zone import Zone
-from tools.Definitions import (
+from Drone import Drone
+from Connection import Connection
+from Zone import Zone
+from Definitions import (
     DroneStatus, EdgeType, Point, ZoneMetadataKeys, ZoneType)
-from tools.Map import Map
+from Map import Map
 
 
 class Parser:
