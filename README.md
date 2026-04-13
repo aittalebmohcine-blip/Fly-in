@@ -31,8 +31,16 @@ python3 fly_in.py <config-file>
 For example:
 
 ```bash
-python3 fly_in.py easy_01_linear_path.txt
+python3 fly_in.py maps/easy/01_linear_path.txt
 ```
+
+Alternatively, use the Makefile commands for convenience:
+
+- `make install`: Install dependencies from requirements.txt
+- `make run`: Run the simulation on all map files in the maps/ directory
+- `make debug`: Run the simulation in debug mode with pdb on the default config (maps/easy/01_linear_path.txt)
+- `make clean`: Clean up __pycache__ and .mypy_cache directories
+- `make lint`: Run linting with flake8 and mypy (excludes venv directory if present)
 
 ### Input format
 
