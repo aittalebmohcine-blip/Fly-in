@@ -33,6 +33,9 @@ def main() -> None:
         # Find the special start and goal hubs for routing.
         start, goal = map.extract_start_goal_names()
 
+        # give all drones start as the init loc
+        map.init_drones_at_start(start)
+
         # Ensure the graph contains both the start and goal nodes.
         map.verify_start_goal_in_graph()
 

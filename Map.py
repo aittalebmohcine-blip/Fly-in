@@ -28,6 +28,11 @@ class Map(BaseModel):
     drones: Dict[str, Drone] = {}
     graph: Dict[str, list[Tuple[str, Connection]]] = {}
 
+    def init_drones_at_start(self, start: str) -> None:
+        """gives every drone the start name as the initial location"""
+        for drone in self.drones.values():
+            drone.loc = start
+
     def verify_start_goal_in_graph(self) -> None:
         """Confirm that both start and goal nodes exist in the graph."""
         start, goal = self.extract_start_goal_names()
