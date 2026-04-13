@@ -8,7 +8,10 @@ install:
 	pip install -r $(REQ)
 
 run:
-	@(python3 $(PROGRAM) $(CONFIG))
+	@for map in $$(find maps -name "*.txt"); do \
+		echo "Running on $$map"; \
+		python3 $(PROGRAM) $$map; \
+	done
 
 debug:
 	python3 -m pdb $(PROGRAM) $(CONFIG)
@@ -18,8 +21,8 @@ clean:
 	rm -rf .mypy_cache
 
 lint:
-	flake8 .
-	mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+	flake8 . --exclude=venv
+	mypy . --exclude venv/ --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 
 lint-strict:
 	flake8 .
